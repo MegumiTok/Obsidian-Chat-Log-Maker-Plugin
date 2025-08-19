@@ -1,0 +1,18 @@
+{
+  // Markdownlint configuration for Obsidian Chat Log Maker Plugin
+  "default": true,
+  
+  // Enforce single space after list markers (standard markdown)
+  "MD030": {
+    "ul_single": 1,
+    "ul_multi": 1,
+    "ol_single": 1,
+    "ol_multi": 1
+  },
+
+  // Disable line length rule for code blocks and tables
+  "MD013": false,
+
+  // Allow raw HTML (useful for complex layouts)
+  "MD033": false
+}
