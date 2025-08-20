@@ -2,12 +2,12 @@
 
 ## 概要
 
-現在すべての機能が一枚のview.tsファイルにまとまっており、メンテナンスが困難な状況。各機能をモジュール化してファイルを分割し、保守性を向上させる。
+現在すべての機能が一枚の view.ts ファイルにまとまっており、メンテナンスが困難な状況。各機能をモジュール化してファイルを分割し、保守性を向上させる。
 
 ## 問題点
 
-- view.tsが980行を超える巨大ファイル
-- UI関連、データ管理、イベント処理が混在
+- view.ts が 980 行を超える巨大ファイル
+- UI 関連、データ管理、イベント処理が混在
 - どこにどのデザインや機能が書かれているかわかりにくい
 - 機能追加・修正時の影響範囲が不明
 
@@ -31,26 +31,31 @@
 ## やったこと
 
 1. **型定義ファイルの分離** (src/types.ts)
+
    - Speaker、Comment インターフェースを分離
    - CHAT_LOG_MAKER_VIEW_TYPE 定数を分離
 
 2. **データ管理クラスの作成** (src/data-manager.ts)
-   - DataManager クラスでSpeakerとコメントの状態管理を統一
-   - CRUD操作、Markdown生成機能を集約
-   - 固定5人のSpeaker初期化処理を内包
 
-3. **UIコンポーネントの分離**
-   - **SpeakerSelector** (src/speaker-selector.ts): Speaker選択ドロップダウンの管理
+   - DataManager クラスで Speaker とコメントの状態管理を統一
+   - CRUD 操作、Markdown 生成機能を集約
+   - 固定 5 人の Speaker 初期化処理を内包
+
+3. **UI コンポーネントの分離**
+
+   - **SpeakerSelector** (src/speaker-selector.ts): Speaker 選択ドロップダウンの管理
    - **PostForm** (src/post-form.ts): 投稿フォームの作成と投稿処理
    - **MessageRenderer** (src/message-renderer.ts): メッセージ表示、編集、返信機能
 
 4. **メインビューの簡潔化** (view.ts)
-   - 980行 → 約180行に大幅削減
+
+   - 980 行 → 約 180 行に大幅削減
    - 各コンポーネントとの連携に集中
    - イベント処理の簡潔化
 
 5. **ファイル構成の改善**
-   - 元のview.tsをview-old.tsにバックアップ
+   - 元の view.ts を view-old.ts にバックアップ
+     - 削除済み
    - src/ディレクトリにモジュールを整理
 
 ## 効果
