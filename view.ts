@@ -64,7 +64,7 @@ export class ChatLogMakerView extends ItemView {
 
     const headerButtons = headerArea.createDiv("chat-log-maker-header-buttons");
     const exportBtn = headerButtons.createEl("button", {
-      text: "📋 エクスポート",
+      text: "📋 Export",
       cls: "chat-log-maker-export-btn",
     });
 
@@ -81,7 +81,7 @@ export class ChatLogMakerView extends ItemView {
     // リフレッシュエリア（固定高さ60px）
     const refreshArea = mainContainer.createDiv("chat-log-maker-refresh-area");
     const refreshBtn = refreshArea.createEl("button", {
-      text: "リフレッシュ",
+      text: "Refresh",
       cls: "chat-log-maker-refresh-btn",
     });
 
@@ -89,9 +89,9 @@ export class ChatLogMakerView extends ItemView {
     exportBtn.addEventListener("click", () => {
       const markdown = this.generateMarkdown();
       navigator.clipboard.writeText(markdown);
-      exportBtn.textContent = "📋 コピーしました！";
+      exportBtn.textContent = "📋 Copied!";
       setTimeout(() => {
-        exportBtn.textContent = "📋 エクスポート";
+        exportBtn.textContent = "📋 Export";
       }, 2000);
     });
 
@@ -103,7 +103,7 @@ export class ChatLogMakerView extends ItemView {
   // 登場人物セクションの作成（固定高さ150px）
   private createParticipantsSection(container: HTMLElement) {
     container.createEl("h3", {
-      text: "👥 登場人物",
+      text: "👥 Characters",
       cls: "chat-log-maker-section-title",
     });
 
@@ -137,7 +137,7 @@ export class ChatLogMakerView extends ItemView {
         });
 
         const deleteBtn = participantItem.createEl("button", {
-          text: "削除",
+          text: "Delete",
           cls: "chat-log-maker-participant-delete",
         });
         deleteBtn.addEventListener("click", () => {
@@ -155,7 +155,7 @@ export class ChatLogMakerView extends ItemView {
 
     // 登場人物追加ボタン
     const addBtn = container.createEl("button", {
-      text: "+ 登場人物を追加",
+      text: "+ Add Character",
       cls: "chat-log-maker-add-participant",
     });
     addBtn.addEventListener("click", () => {
@@ -170,7 +170,7 @@ export class ChatLogMakerView extends ItemView {
   private createChatArea(container: HTMLElement) {
     // タイトル表示
     const titleDisplay = container.createEl("h3", {
-      text: this.threadTitle || "💬 タイトルなし",
+      text: this.threadTitle || "💬 No Title",
       cls: "chat-log-maker-chat-title",
     });
 
@@ -189,7 +189,7 @@ export class ChatLogMakerView extends ItemView {
       // タイトル更新
       titleDisplay.textContent = this.threadTitle
         ? `💬 ${this.threadTitle}`
-        : "💬 タイトルなし";
+        : "💬 No Title";
 
       // メッセージ更新
       this.renderMessages(messagesContainer);
@@ -208,7 +208,7 @@ export class ChatLogMakerView extends ItemView {
         cls: "chat-log-maker-message-author",
       });
       welcomeMessage.createDiv({
-        text: "チャットログが表示されます。下のフォームからメッセージを投稿してください。",
+        text: "Chat logs will be displayed here. Please post a message using the form below.",
         cls: "chat-log-maker-message-content",
       });
     } else {
@@ -226,7 +226,7 @@ export class ChatLogMakerView extends ItemView {
           );
         }
 
-        // メッセージヘッダー（話者名とアクションボタン）
+        // メッセージヘッダー（話者名と編集・削除ボタン）
         const messageHeader = messageDiv.createDiv(
           "chat-log-maker-message-header"
         );
@@ -239,20 +239,16 @@ export class ChatLogMakerView extends ItemView {
           cls: "chat-log-maker-message-author",
         });
 
-        // アクションボタン
+        // 編集・削除ボタン（ヘッダー内）
         const messageActions = messageHeader.createDiv(
           "chat-log-maker-message-actions"
         );
-        const replyBtn = messageActions.createEl("button", {
-          text: "返信",
-          cls: "chat-log-maker-reply-btn",
-        });
         const editBtn = messageActions.createEl("button", {
-          text: "編集",
+          text: "Edit",
           cls: "chat-log-maker-edit-btn",
         });
         const deleteBtn = messageActions.createEl("button", {
-          text: "削除",
+          text: "Delete",
           cls: "chat-log-maker-delete-btn",
         });
 
@@ -260,6 +256,13 @@ export class ChatLogMakerView extends ItemView {
         const contentDiv = messageDiv.createDiv({
           text: comment.content,
           cls: "chat-log-maker-message-content",
+        });
+
+        // 返信ボタン（メッセージの下）
+        const messageFooter = messageDiv.createDiv("chat-log-maker-message-footer");
+        const replyBtn = messageFooter.createEl("button", {
+          text: "Reply",
+          cls: "chat-log-maker-reply-btn",
         });
 
         // 返信ボタンのイベント
@@ -310,12 +313,12 @@ export class ChatLogMakerView extends ItemView {
     const parentAuthorName =
       this.characters.find(c => c.id === parentComment.author)?.name ||
       parentComment.author;
-    replyTo.textContent = `${parentAuthorName} への返信:`;
+    replyTo.textContent = `Replying to ${parentAuthorName}:`;
 
     // 話者選択
     const speakerContainer = replyForm.createDiv("chat-log-maker-form-row");
     speakerContainer.createEl("label", {
-      text: "話者:",
+      text: "Speaker:",
       cls: "chat-log-maker-form-label",
     });
     const speakerSelect = speakerContainer.createEl("select", {
@@ -332,22 +335,22 @@ export class ChatLogMakerView extends ItemView {
     // メッセージ入力
     const messageContainer = replyForm.createDiv("chat-log-maker-form-row");
     messageContainer.createEl("label", {
-      text: "返信:",
+      text: "Reply:",
       cls: "chat-log-maker-form-label",
     });
     const textarea = messageContainer.createEl("textarea", {
       cls: "chat-log-maker-message-input",
-      attr: { placeholder: "返信内容を入力してください..." },
+      attr: { placeholder: "Enter reply content..." },
     });
 
     // ボタンエリア
     const buttonContainer = replyForm.createDiv("chat-log-maker-reply-buttons");
     const replySubmitBtn = buttonContainer.createEl("button", {
-      text: "返信投稿",
+      text: "Post Reply",
       cls: "chat-log-maker-reply-submit-btn",
     });
     const cancelBtn = buttonContainer.createEl("button", {
-      text: "キャンセル",
+      text: "Cancel",
       cls: "chat-log-maker-cancel-btn",
     });
 
@@ -415,7 +418,7 @@ export class ChatLogMakerView extends ItemView {
     // 話者選択
     const speakerContainer = editForm.createDiv("chat-log-maker-edit-row");
     speakerContainer.createEl("label", {
-      text: "話者:",
+      text: "Speaker:",
       cls: "chat-log-maker-form-label",
     });
     const speakerSelect = speakerContainer.createEl("select", {
@@ -435,7 +438,7 @@ export class ChatLogMakerView extends ItemView {
     // メッセージ編集
     const messageContainer = editForm.createDiv("chat-log-maker-edit-row");
     messageContainer.createEl("label", {
-      text: "メッセージ:",
+      text: "Message:",
       cls: "chat-log-maker-form-label",
     });
     const textarea = messageContainer.createEl("textarea", {
@@ -446,11 +449,11 @@ export class ChatLogMakerView extends ItemView {
     // ボタンエリア
     const buttonContainer = editForm.createDiv("chat-log-maker-edit-buttons");
     const saveBtn = buttonContainer.createEl("button", {
-      text: "保存",
+      text: "Save",
       cls: "chat-log-maker-save-btn",
     });
     const cancelBtn = buttonContainer.createEl("button", {
-      text: "キャンセル",
+      text: "Cancel",
       cls: "chat-log-maker-cancel-btn",
     });
 
@@ -484,7 +487,7 @@ export class ChatLogMakerView extends ItemView {
     // 話者選択
     const speakerContainer = container.createDiv("chat-log-maker-form-row");
     speakerContainer.createEl("label", {
-      text: "話者:",
+      text: "Speaker:",
       cls: "chat-log-maker-form-label",
     });
     const speakerSelect = speakerContainer.createEl("select", {
@@ -494,18 +497,18 @@ export class ChatLogMakerView extends ItemView {
     // メッセージ入力
     const messageContainer = container.createDiv("chat-log-maker-form-row");
     messageContainer.createEl("label", {
-      text: "メッセージ:",
+      text: "Message:",
       cls: "chat-log-maker-form-label",
     });
     const messageInput = messageContainer.createEl("textarea", {
       cls: "chat-log-maker-message-input",
-      attr: { placeholder: "メッセージを入力してください..." },
+      attr: { placeholder: "Enter message..." },
     });
 
     // ボタンエリア
     const buttonContainer = container.createDiv("chat-log-maker-form-buttons");
     const postBtn = buttonContainer.createEl("button", {
-      text: "投稿",
+      text: "Post",
       cls: "chat-log-maker-post-button",
     });
 
