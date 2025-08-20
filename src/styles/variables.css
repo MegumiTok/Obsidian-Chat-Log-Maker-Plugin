@@ -1,0 +1,45 @@
+/* CSS変数定義と基本設定 */
+
+/* プラグイン専用のCSS変数 */
+:root {
+  /* 間隔設定 */
+  --chat-log-spacing-xs: 4px;
+  --chat-log-spacing-sm: 8px;
+  --chat-log-spacing-md: 12px;
+  --chat-log-spacing-lg: 16px;
+  --chat-log-spacing-xl: 20px;
+
+  /* ボーダー半径 */
+  --chat-log-border-radius-sm: 3px;
+  --chat-log-border-radius-md: 4px;
+  --chat-log-border-radius-lg: 6px;
+  --chat-log-border-radius-xl: 8px;
+
+  /* フォントサイズ */
+  --chat-log-font-size-xs: 10px;
+  --chat-log-font-size-sm: 11px;
+  --chat-log-font-size-md: 12px;
+  --chat-log-font-size-base: 14px;
+  --chat-log-font-size-lg: 16px;
+  --chat-log-font-size-xl: 18px;
+
+  /* レイアウト固定サイズ */
+  --chat-log-speaker-section-height: 150px;
+  --chat-log-refresh-section-height: 60px;
+  --chat-log-min-chat-height: 300px;
+
+  /* トランジション */
+  --chat-log-transition-fast: 0.2s ease;
+
+  /* インデント */
+  --chat-log-reply-indent: 20px;
+
+  /* スクロールバー */
+  --chat-log-scrollbar-width: 6px;
+  --chat-log-scrollbar-radius: 3px;
+}
+
+/* 基本リセット */
+.chat-log-maker-container * {
+  box-sizing: border-box;
+}

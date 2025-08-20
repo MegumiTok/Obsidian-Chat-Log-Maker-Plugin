@@ -1,0 +1,149 @@
+/* ボタン関連のスタイル */
+
+/* ボタン基本設定 */
+.chat-log-maker-btn {
+  border: none;
+  border-radius: var(--chat-log-border-radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--chat-log-transition-fast);
+}
+
+/* アクセントボタン（主要アクション） */
+.chat-log-maker-export-btn,
+.chat-log-maker-add-participant,
+.chat-log-maker-refresh-btn,
+.chat-log-maker-post-button,
+.chat-log-maker-reply-submit-btn,
+.chat-log-maker-save-btn {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: var(--chat-log-border-radius-md);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* エラーボタン */
+.chat-log-maker-participant-delete {
+  background: var(--background-modifier-error);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: var(--chat-log-border-radius-sm);
+  padding: var(--chat-log-spacing-sm) var(--chat-log-spacing-lg);
+  cursor: pointer;
+  font-size: var(--chat-log-font-size-xs);
+}
+
+/* 小さなアクションボタン（編集・削除など） */
+.chat-log-maker-edit-btn,
+.chat-log-maker-delete-btn {
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--chat-log-border-radius-sm);
+  padding: 2px var(--chat-log-spacing-lg);
+  cursor: pointer;
+  font-size: var(--chat-log-font-size-xs);
+  transition: all var(--chat-log-transition-fast);
+}
+
+/* 返信ボタン - テキストのみ表示 */
+.chat-log-maker-reply-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: var(--chat-log-border-radius-sm);
+  padding: 2px var(--chat-log-spacing-lg);
+  cursor: pointer;
+  font-size: var(--chat-log-font-size-xs);
+  transition: all var(--chat-log-transition-fast);
+}
+
+/* メッセージフッターの返信ボタン */
+.chat-log-maker-message-footer .chat-log-maker-reply-btn {
+  background: transparent;
+  color: var(--text-normal);
+  border: none;
+  border-radius: var(--chat-log-border-radius-md);
+  padding: var(--chat-log-spacing-xs) var(--chat-log-spacing-md);
+  font-size: var(--chat-log-font-size-sm);
+  font-weight: 500;
+}
+
+/* セカンダリボタン */
+.chat-log-maker-cancel-btn {
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--chat-log-border-radius-md);
+  cursor: pointer;
+}
+
+/* ボタン個別サイズ調整 */
+.chat-log-maker-export-btn {
+  padding: var(--chat-log-spacing-lg) var(--chat-log-spacing-md);
+  font-size: var(--chat-log-font-size-md);
+}
+
+.chat-log-maker-add-participant {
+  padding: var(--chat-log-spacing-lg) var(--chat-log-spacing-md);
+  font-size: var(--chat-log-font-size-sm);
+  align-self: flex-start;
+}
+
+.chat-log-maker-refresh-btn {
+  padding: var(--chat-log-spacing-sm) var(--chat-log-spacing-lg);
+  font-size: var(--chat-log-font-size-base);
+}
+
+.chat-log-maker-post-button {
+  padding: var(--chat-log-spacing-sm) var(--chat-log-spacing-lg);
+  font-size: var(--chat-log-font-size-base);
+}
+
+.chat-log-maker-reply-submit-btn,
+.chat-log-maker-save-btn {
+  padding: var(--chat-log-spacing-lg) var(--chat-log-spacing-md);
+  font-size: var(--chat-log-font-size-md);
+}
+
+.chat-log-maker-cancel-btn {
+  padding: var(--chat-log-spacing-lg) var(--chat-log-spacing-md);
+  font-size: var(--chat-log-font-size-md);
+}
+
+/* ボタンホバー効果 */
+/* 透明度変更ホバー */
+.chat-log-maker-export-btn:hover,
+.chat-log-maker-add-participant:hover,
+.chat-log-maker-refresh-btn:hover,
+.chat-log-maker-post-button:hover,
+.chat-log-maker-reply-submit-btn:hover,
+.chat-log-maker-save-btn:hover,
+.chat-log-maker-cancel-btn:hover,
+.chat-log-maker-participant-delete:hover {
+  opacity: 0.8;
+}
+
+/* 返信ボタンのホバー効果 */
+.chat-log-maker-reply-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.chat-log-maker-message-footer .chat-log-maker-reply-btn:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+/* 色変更ホバー */
+.chat-log-maker-edit-btn:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.chat-log-maker-delete-btn:hover {
+  background: var(--background-modifier-error);
+  color: var(--text-on-accent);
+}

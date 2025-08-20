@@ -1,0 +1,80 @@
+/* メッセージ表示関連のスタイル */
+
+/* メッセージコンテナ */
+.chat-log-maker-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--chat-log-spacing-md);
+  padding: var(--chat-log-spacing-sm) 0;
+}
+
+/* 個別メッセージ */
+.chat-log-maker-message {
+  padding: var(--chat-log-spacing-sm) var(--chat-log-spacing-md);
+  background: var(--background-primary);
+  border-radius: var(--chat-log-border-radius-xl);
+  border-left: 3px solid var(--interactive-accent);
+  margin-bottom: var(--chat-log-spacing-xs);
+  position: relative;
+}
+
+.chat-log-maker-message:hover .chat-log-maker-message-actions {
+  opacity: 1;
+}
+
+/* メッセージヘッダー */
+.chat-log-maker-message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--chat-log-spacing-xs);
+}
+
+.chat-log-maker-message-author {
+  font-weight: 600;
+  color: var(--text-accent);
+  font-size: var(--chat-log-font-size-md);
+}
+
+.chat-log-maker-message-actions {
+  display: flex;
+  gap: var(--chat-log-spacing-xs);
+  opacity: 0;
+  transition: opacity var(--chat-log-transition-fast);
+}
+
+/* メッセージ内容 */
+.chat-log-maker-message-content {
+  color: var(--text-normal);
+  font-size: var(--chat-log-font-size-base);
+  line-height: 1.4;
+}
+
+/* メッセージフッター（返信ボタン用） */
+.chat-log-maker-message-footer {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: var(--chat-log-spacing-sm);
+  padding-top: var(--chat-log-spacing-lg);
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+/* 返信レベルの視覚化 */
+.chat-log-maker-reply-level-1 {
+  border-left: 3px solid var(--interactive-normal);
+  background: var(--background-modifier-hover);
+}
+
+.chat-log-maker-reply-level-2 {
+  border-left: 3px solid var(--text-accent);
+  background: var(--background-modifier-hover);
+  opacity: 0.9;
+}
+
+.chat-log-maker-reply-level-3 {
+  border-left: 3px solid var(--text-muted);
+  background: var(--background-modifier-hover);
+  opacity: 0.8;
+}
