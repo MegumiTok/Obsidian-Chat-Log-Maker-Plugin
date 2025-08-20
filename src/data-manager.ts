@@ -1,10 +1,9 @@
-import { Speaker, Comment } from './types';
+import { Speaker, Comment } from "./types";
 
 // データ管理クラス：Speakerとコメントの管理を担当
 export class DataManager {
   private speakers: Speaker[] = [];
   private comments: Comment[] = [];
-  private threadTitle = "";
 
   constructor() {
     // 固定5人のSpeakerを設定
@@ -61,29 +60,18 @@ export class DataManager {
     }
   }
 
-  // Thread title関連
-  getThreadTitle(): string {
-    return this.threadTitle;
-  }
-
-  setThreadTitle(title: string): void {
-    this.threadTitle = title;
-  }
-
   // Markdown生成
   generateMarkdown(): string {
     let markdown = "";
 
-    if (this.threadTitle) {
-      markdown += `# ${this.threadTitle}\\n\\n`;
-    }
-
     this.comments.forEach(comment => {
       const authorName = this.getSpeakerNameById(comment.author);
-      
+
       // 階層レベルに応じて > の数を調整
-      const quotePrefix = ">".repeat(Math.max(1, (comment.replyLevel || 0) + 1));
-      
+      const quotePrefix = ">".repeat(
+        Math.max(1, (comment.replyLevel || 0) + 1)
+      );
+
       markdown += `${quotePrefix} ${authorName}: ${comment.content}\\n\\n`;
     });
 

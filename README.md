@@ -38,6 +38,5 @@ This command will:
 ## Usage
 
 1. Open the Chat Log Maker view (ribbon icon or command palette)
-2. Set conversation title and add speakers
-3. Create comments and replies in the preview panel
-4. Export to markdown format with one click
+2. Create comments and replies in the preview panel
+3. Export to markdown format with one click

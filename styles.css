@@ -71,15 +71,6 @@
 * メッセージ表示 
 ============== */
 
-.chat-log-maker-chat-title {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-normal);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-
 .chat-log-maker-messages {
   flex: 1;
   overflow-y: auto;
@@ -198,7 +189,7 @@
 }
 
 .chat-log-maker-speaker-select {
-  padding: 8px 12px;
+  padding: 4px 12px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   background: var(--background-secondary);
