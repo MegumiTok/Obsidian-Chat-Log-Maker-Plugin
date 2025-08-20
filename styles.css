@@ -185,6 +185,7 @@
   transition: opacity 0.2s ease;
 }
 
+.chat-log-maker-reply-btn,
 .chat-log-maker-edit-btn,
 .chat-log-maker-delete-btn {
   background: var(--background-secondary);
@@ -195,6 +196,11 @@
   cursor: pointer;
   font-size: 10px;
   transition: all 0.2s ease;
+}
+
+.chat-log-maker-reply-btn:hover {
+  background: var(--interactive-normal);
+  color: var(--text-on-accent);
 }
 
 .chat-log-maker-edit-btn:hover {
@@ -420,5 +426,68 @@
 }
 
 .chat-log-maker-post-button:hover {
+  opacity: 0.8;
+}
+
+/* 返信フォーム */
+.chat-log-maker-reply-form {
+  background: var(--background-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  padding: 12px;
+  margin-top: 8px;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 3px solid var(--interactive-normal);
+}
+
+.chat-log-maker-reply-to {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: var(--background-modifier-hover);
+  border-radius: 4px;
+}
+
+.chat-log-maker-reply-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.chat-log-maker-reply-submit-btn {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chat-log-maker-reply-submit-btn:hover {
+  opacity: 0.8;
+}
+
+/* 返信レベルの視覚化 */
+.chat-log-maker-reply-level-1 {
+  border-left: 3px solid var(--interactive-normal);
+  background: var(--background-modifier-hover);
+}
+
+.chat-log-maker-reply-level-2 {
+  border-left: 3px solid var(--text-accent);
+  background: var(--background-modifier-hover);
+  opacity: 0.9;
+}
+
+.chat-log-maker-reply-level-3 {
+  border-left: 3px solid var(--text-muted);
+  background: var(--background-modifier-hover);
   opacity: 0.8;
 }

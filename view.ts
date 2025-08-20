@@ -15,6 +15,8 @@ interface Comment {
   author: string;
   content: string;
   timestamp: number;
+  replyLevel: number; // 0=トップレベル, 1=返信, 2=返信の返信...
+  parentId?: string; // 返信先メッセージのID
 }
 
 // ItemViewを継承して、独自のビュークラスを作成します
@@ -174,7 +176,7 @@ export class ChatLogMakerView extends ItemView {
 
     // メッセージ表示エリア（スクロール可能）
     const messagesContainer = container.createDiv("chat-log-maker-messages");
-    
+
     // 投稿フォーム
     const postForm = container.createDiv("chat-log-maker-post-form");
     this.createPostForm(postForm);
@@ -198,7 +200,9 @@ export class ChatLogMakerView extends ItemView {
   private renderMessages(messagesContainer: HTMLElement) {
     messagesContainer.empty();
     if (this.comments.length === 0) {
-      const welcomeMessage = messagesContainer.createDiv("chat-log-maker-message");
+      const welcomeMessage = messagesContainer.createDiv(
+        "chat-log-maker-message"
+      );
       welcomeMessage.createDiv({
         text: "A",
         cls: "chat-log-maker-message-author",
@@ -209,11 +213,24 @@ export class ChatLogMakerView extends ItemView {
       });
     } else {
       this.comments.forEach((comment, index) => {
-        const messageDiv = messagesContainer.createDiv("chat-log-maker-message");
+        const messageDiv = messagesContainer.createDiv(
+          "chat-log-maker-message"
+        );
+
+        // ネストレベルに応じてインデントを設定
+        const indentLevel = comment.replyLevel || 0;
+        messageDiv.style.marginLeft = `${indentLevel * 20}px`;
+        if (indentLevel > 0) {
+          messageDiv.classList.add(
+            `chat-log-maker-reply-level-${Math.min(indentLevel, 3)}`
+          );
+        }
 
         // メッセージヘッダー（話者名とアクションボタン）
-        const messageHeader = messageDiv.createDiv("chat-log-maker-message-header");
-        
+        const messageHeader = messageDiv.createDiv(
+          "chat-log-maker-message-header"
+        );
+
         const authorName =
           this.characters.find(c => c.id === comment.author)?.name ||
           comment.author;
@@ -223,20 +240,31 @@ export class ChatLogMakerView extends ItemView {
         });
 
         // アクションボタン
-        const messageActions = messageHeader.createDiv("chat-log-maker-message-actions");
+        const messageActions = messageHeader.createDiv(
+          "chat-log-maker-message-actions"
+        );
+        const replyBtn = messageActions.createEl("button", {
+          text: "返信",
+          cls: "chat-log-maker-reply-btn",
+        });
         const editBtn = messageActions.createEl("button", {
           text: "編集",
-          cls: "chat-log-maker-edit-btn"
+          cls: "chat-log-maker-edit-btn",
         });
         const deleteBtn = messageActions.createEl("button", {
           text: "削除",
-          cls: "chat-log-maker-delete-btn"
+          cls: "chat-log-maker-delete-btn",
         });
 
         // メッセージ内容
         const contentDiv = messageDiv.createDiv({
           text: comment.content,
           cls: "chat-log-maker-message-content",
+        });
+
+        // 返信ボタンのイベント
+        replyBtn.addEventListener("click", () => {
+          this.showReplyForm(messageDiv, comment, index);
         });
 
         // 編集ボタンのイベント
@@ -253,22 +281,147 @@ export class ChatLogMakerView extends ItemView {
     }
   }
 
+  // 返信フォームの表示
+  private showReplyForm(
+    messageDiv: HTMLElement,
+    parentComment: Comment,
+    parentIndex: number
+  ) {
+    // 既存の返信フォームがあれば削除
+    const existingReplyForm = messageDiv.querySelector(
+      ".chat-log-maker-reply-form"
+    );
+    if (existingReplyForm) {
+      existingReplyForm.remove();
+      return;
+    }
+
+    // 他のメッセージの返信フォームも削除
+    const allReplyForms = document.querySelectorAll(
+      ".chat-log-maker-reply-form"
+    );
+    allReplyForms.forEach(form => form.remove());
+
+    // 返信フォームを作成
+    const replyForm = messageDiv.createDiv("chat-log-maker-reply-form");
+
+    // 返信先表示
+    const replyTo = replyForm.createDiv("chat-log-maker-reply-to");
+    const parentAuthorName =
+      this.characters.find(c => c.id === parentComment.author)?.name ||
+      parentComment.author;
+    replyTo.textContent = `${parentAuthorName} への返信:`;
+
+    // 話者選択
+    const speakerContainer = replyForm.createDiv("chat-log-maker-form-row");
+    speakerContainer.createEl("label", {
+      text: "話者:",
+      cls: "chat-log-maker-form-label",
+    });
+    const speakerSelect = speakerContainer.createEl("select", {
+      cls: "chat-log-maker-speaker-select",
+    });
+
+    // 話者選択の初期化
+    this.characters.forEach(character => {
+      const option = speakerSelect.createEl("option");
+      option.value = character.id;
+      option.textContent = character.name || character.id;
+    });
+
+    // メッセージ入力
+    const messageContainer = replyForm.createDiv("chat-log-maker-form-row");
+    messageContainer.createEl("label", {
+      text: "返信:",
+      cls: "chat-log-maker-form-label",
+    });
+    const textarea = messageContainer.createEl("textarea", {
+      cls: "chat-log-maker-message-input",
+      attr: { placeholder: "返信内容を入力してください..." },
+    });
+
+    // ボタンエリア
+    const buttonContainer = replyForm.createDiv("chat-log-maker-reply-buttons");
+    const replySubmitBtn = buttonContainer.createEl("button", {
+      text: "返信投稿",
+      cls: "chat-log-maker-reply-submit-btn",
+    });
+    const cancelBtn = buttonContainer.createEl("button", {
+      text: "キャンセル",
+      cls: "chat-log-maker-cancel-btn",
+    });
+
+    // 返信投稿ボタンのイベント
+    replySubmitBtn.addEventListener("click", () => {
+      const selectedSpeaker = speakerSelect.value;
+      const message = textarea.value.trim();
+
+      if (!message) {
+        textarea.focus();
+        return;
+      }
+
+      if (!selectedSpeaker) {
+        speakerSelect.focus();
+        return;
+      }
+
+      const newReply: Comment = {
+        id: Date.now().toString(),
+        author: selectedSpeaker,
+        content: message,
+        timestamp: Date.now(),
+        replyLevel: Math.min((parentComment.replyLevel || 0) + 1, 3), // 最大3レベル
+        parentId: parentComment.id,
+      };
+
+      // 親コメントの直後に挿入
+      this.comments.splice(parentIndex + 1, 0, newReply);
+      this.updateChatDisplay();
+    });
+
+    // キャンセルボタンのイベント
+    cancelBtn.addEventListener("click", () => {
+      replyForm.remove();
+    });
+
+    // Enterキーでの投稿（Shift+Enterで改行）
+    textarea.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        replySubmitBtn.click();
+      }
+    });
+
+    // テキストエリアにフォーカス
+    textarea.focus();
+  }
+
   // 編集モードの有効化
-  private enableEditMode(messageDiv: HTMLElement, comment: Comment, index: number) {
+  private enableEditMode(
+    messageDiv: HTMLElement,
+    comment: Comment,
+    index: number
+  ) {
     // 既存のコンテンツを取得
-    const contentDiv = messageDiv.querySelector('.chat-log-maker-message-content') as HTMLElement;
+    const contentDiv = messageDiv.querySelector(
+      ".chat-log-maker-message-content"
+    ) as HTMLElement;
     const originalContent = comment.content;
 
     // 編集フォームを作成
     const editForm = messageDiv.createDiv("chat-log-maker-edit-form");
-    
+
     // 話者選択
     const speakerContainer = editForm.createDiv("chat-log-maker-edit-row");
-    speakerContainer.createEl("label", { text: "話者:", cls: "chat-log-maker-form-label" });
-    const speakerSelect = speakerContainer.createEl("select", {
-      cls: "chat-log-maker-speaker-select"
+    speakerContainer.createEl("label", {
+      text: "話者:",
+      cls: "chat-log-maker-form-label",
     });
-    
+    const speakerSelect = speakerContainer.createEl("select", {
+      cls: "chat-log-maker-speaker-select",
+    });
+
     // 話者選択の初期化
     this.characters.forEach(character => {
       const option = speakerSelect.createEl("option");
@@ -281,21 +434,24 @@ export class ChatLogMakerView extends ItemView {
 
     // メッセージ編集
     const messageContainer = editForm.createDiv("chat-log-maker-edit-row");
-    messageContainer.createEl("label", { text: "メッセージ:", cls: "chat-log-maker-form-label" });
+    messageContainer.createEl("label", {
+      text: "メッセージ:",
+      cls: "chat-log-maker-form-label",
+    });
     const textarea = messageContainer.createEl("textarea", {
       cls: "chat-log-maker-message-input",
-      text: originalContent
+      text: originalContent,
     });
 
     // ボタンエリア
     const buttonContainer = editForm.createDiv("chat-log-maker-edit-buttons");
     const saveBtn = buttonContainer.createEl("button", {
       text: "保存",
-      cls: "chat-log-maker-save-btn"
+      cls: "chat-log-maker-save-btn",
     });
     const cancelBtn = buttonContainer.createEl("button", {
       text: "キャンセル",
-      cls: "chat-log-maker-cancel-btn"
+      cls: "chat-log-maker-cancel-btn",
     });
 
     // 元のコンテンツを隠す
@@ -305,7 +461,7 @@ export class ChatLogMakerView extends ItemView {
     saveBtn.addEventListener("click", () => {
       const newContent = textarea.value.trim();
       const newAuthor = speakerSelect.value;
-      
+
       if (newContent) {
         this.comments[index].content = newContent;
         this.comments[index].author = newAuthor;
@@ -327,24 +483,30 @@ export class ChatLogMakerView extends ItemView {
   private createPostForm(container: HTMLElement) {
     // 話者選択
     const speakerContainer = container.createDiv("chat-log-maker-form-row");
-    speakerContainer.createEl("label", { text: "話者:", cls: "chat-log-maker-form-label" });
+    speakerContainer.createEl("label", {
+      text: "話者:",
+      cls: "chat-log-maker-form-label",
+    });
     const speakerSelect = speakerContainer.createEl("select", {
-      cls: "chat-log-maker-speaker-select"
+      cls: "chat-log-maker-speaker-select",
     });
 
     // メッセージ入力
     const messageContainer = container.createDiv("chat-log-maker-form-row");
-    messageContainer.createEl("label", { text: "メッセージ:", cls: "chat-log-maker-form-label" });
+    messageContainer.createEl("label", {
+      text: "メッセージ:",
+      cls: "chat-log-maker-form-label",
+    });
     const messageInput = messageContainer.createEl("textarea", {
       cls: "chat-log-maker-message-input",
-      attr: { placeholder: "メッセージを入力してください..." }
+      attr: { placeholder: "メッセージを入力してください..." },
     });
 
     // ボタンエリア
     const buttonContainer = container.createDiv("chat-log-maker-form-buttons");
     const postBtn = buttonContainer.createEl("button", {
       text: "投稿",
-      cls: "chat-log-maker-post-button"
+      cls: "chat-log-maker-post-button",
     });
 
     // 話者選択の更新関数
@@ -364,18 +526,27 @@ export class ChatLogMakerView extends ItemView {
     postBtn.addEventListener("click", () => {
       const selectedSpeaker = speakerSelect.value;
       const message = messageInput.value.trim();
-      
+
       if (message) {
         const newComment: Comment = {
           id: Date.now().toString(),
           author: selectedSpeaker,
           content: message,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          replyLevel: 0, // 新規投稿は常にトップレベル
         };
-        
+
         this.comments.push(newComment);
         this.updateChatDisplay();
         messageInput.value = "";
+      }
+    });
+
+    // Enterキーでの投稿（Shift+Enterで改行）
+    messageInput.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        postBtn.click();
       }
     });
 
