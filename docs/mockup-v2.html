@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Log Maker v2 - Interactive Mockup (Rev 3)</title>
+    <style>
+      /* --- General Styles --- */
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --bg-tertiary: #f7fafc;
+        --border-color: #e2e8f0;
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
+        --accent-color: #4299e1;
+        --accent-bg: rgba(66, 153, 225, 0.1);
+        --reply-line-colors: #a0aec0, #4299e1, #38a169, #d69e2e, #dd6b20;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+          sans-serif;
+        display: flex;
+        height: 100vh;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        overflow: hidden;
+      }
+
+      /* --- Main Editor Area (Left) --- */
+      .main-editor {
+        flex: 1;
+        padding: 24px;
+        background: var(--bg-primary);
+        overflow-y: auto;
+      }
+
+      .editor-content {
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.7;
+      }
+
+      .editor-content pre {
+        background: var(--accent-bg);
+        border-radius: 8px;
+        padding: 16px;
+        border: 2px dashed var(--accent-color);
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: inherit;
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+      .editor-content pre:hover {
+        background: rgba(66, 153, 225, 0.2);
+      }
+      .editor-content h1,
+      .editor-content h2 {
+        margin-bottom: 1rem;
+      }
+
+      /* --- Chat Panel (Right) --- */
+      .chat-panel {
+        width: 400px;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-primary);
+        border-left: 1px solid var(--border-color);
+        box-shadow: -2px 0 12px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease-out;
+        transform: translateX(100%);
+      }
+      .chat-panel.show {
+        transform: translateX(0);
+      }
+
+      /* Panel Header */
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-tertiary);
+        flex-shrink: 0;
+      }
+
+      .panel-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .close-button {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        color: var(--text-muted);
+        padding: 4px;
+        border-radius: 4px;
+      }
+      .close-button:hover {
+        background: var(--border-color);
+      }
+
+      /* Participants Section */
+      .participants-section {
+        height: 150px;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+        overflow-y: auto;
+        flex-shrink: 0;
+      }
+
+      .participants-header {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+      }
+
+      .participant-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .participant-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg-primary);
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+      }
+
+      .participant-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 0;
+        background-color: var(--bg-tertiary);
+      }
+
+      .participant-name-input {
+        flex-grow: 1;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 8px;
+        font-size: 0.85rem;
+        outline: none;
+      }
+      .participant-name-input:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px var(--accent-bg);
+      }
+
+      .btn {
+        padding: 6px 12px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: background 0.2s;
+      }
+      .btn:hover {
+        background: var(--bg-tertiary);
+      }
+      .btn-add {
+        width: 100%;
+        margin-top: 12px;
+        background: var(--bg-tertiary);
+      }
+      .btn-add:hover {
+        background: #e2e8f0;
+      }
+      .btn-export {
+        font-size: 0.9rem;
+        padding: 4px 8px;
+      }
+
+      /* Chat Display Area */
+      .chat-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .chat-title {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-tertiary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        background: var(--bg-primary);
+      }
+
+      .message {
+        position: relative;
+        padding-left: calc(var(--reply-level, 0) * 24px);
+      }
+
+      .message-content-wrapper {
+        position: relative;
+        padding-left: 20px;
+        margin-bottom: 16px;
+      }
+
+      /* Reddit-style reply lines */
+      .reply-line {
+        position: absolute;
+        left: 8px;
+        top: 4px;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--line-color, var(--border-color));
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .reply-line:hover {
+        background-color: var(--accent-color) !important;
+      }
+
+      .message-bubble {
+        background: var(--bg-tertiary);
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+      }
+
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+
+      .speaker-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .message-content {
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      /* Settings Area */
+      .settings-section {
+        height: 60px;
+        padding: 0 16px;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Editor Area -->
+    <div class="main-editor">
+      <div class="editor-content">
+        <h1>ミーティング議事録</h1>
+        <pre class="chat-block" title="クリックしてチャットログを生成">
+# チームミーティング
+> Alice: 皆さん、お疲れ様です！
+> Bob: お疲れ様！今日はいい進捗がありそうですね
+> Alice: そうですね。まず現在の状況を共有しましょう
+>> Charlie: 横から失礼します。資料の準備できました
+>>> Alice: ありがとうございます、Charlieさん！
+> Bob: 今週中にはプロトタイプが完成予定です
+            </pre
+        >
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel">
+      <div class="panel-header">
+        <span class="panel-title">Chat Log Preview</span>
+        <div class="header-buttons">
+          <button class="btn btn-export" title="Markdownとしてコピー">
+            📋
+          </button>
+          <button class="close-button" title="チャットパネルを閉じる">
+            &times;
+          </button>
+        </div>
+      </div>
+
+      <div class="participants-section">
+        <div class="participants-header">👥 登場人物</div>
+        <div class="participant-list"></div>
+        <button class="btn btn-add">+ 登場人物を追加</button>
+      </div>
+
+      <div class="chat-section">
+        <div class="chat-title"></div>
+        <div class="messages-container"></div>
+      </div>
+
+      <div class="settings-section">
+        <button class="btn" id="refresh-btn">リフレッシュ</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const chatPanel = document.querySelector(".chat-panel");
+        const chatBlock = document.querySelector(".chat-block");
+        const closeButton = document.querySelector(".close-button");
+        const exportButton = document.querySelector(".btn-export");
+        const participantListContainer =
+          document.querySelector(".participant-list");
+        const messagesContainer = document.querySelector(".messages-container");
+        const chatTitleElement = document.querySelector(".chat-title");
+        const addParticipantBtn = document.querySelector(".btn-add");
+        const refreshBtn = document.getElementById("refresh-btn");
+
+        let participants = new Map();
+        let messages = [];
+        let chatTitle = "チャットログ";
+
+        function parseChat(markdownText) {
+          const lines = markdownText.trim().split("\n");
+          const parsedMessages = [];
+          const newParticipants = new Map();
+          const authorToLabelMap = new Map();
+          let labelCounter = 0;
+          chatTitle = "チャットログ"; // Reset title
+
+          function getNextLabel() {
+            return String.fromCharCode(65 + labelCounter++);
+          }
+
+          lines.forEach(line => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith("#")) {
+              chatTitle = trimmedLine.substring(1).trim();
+              return;
+            }
+
+            const match = trimmedLine.match(/^(>{1,})\s*([^:]+):\s*(.*)$/);
+            if (match) {
+              const replyLevel = match[1].length - 1;
+              const originalName = match[2].trim();
+              const content = match[3].trim();
+
+              let authorLabel;
+              if (authorToLabelMap.has(originalName)) {
+                authorLabel = authorToLabelMap.get(originalName);
+              } else {
+                authorLabel = getNextLabel();
+                authorToLabelMap.set(originalName, authorLabel);
+                newParticipants.set(authorLabel, {
+                  label: authorLabel,
+                  originalName: originalName,
+                  displayName: originalName,
+                });
+              }
+              parsedMessages.push({ authorLabel, content, replyLevel });
+            }
+          });
+
+          participants = newParticipants;
+          messages = parsedMessages;
+        }
+
+        function renderParticipants() {
+          participantListContainer.innerHTML = "";
+          const sortedParticipants = Array.from(participants.values()).sort(
+            (a, b) => a.label.localeCompare(b.label)
+          );
+
+          sortedParticipants.forEach(data => {
+            const row = document.createElement("div");
+            row.className = "participant-row";
+            row.innerHTML = `
+                <span class="participant-label">${data.label}</span>
+                <input type="text" class="participant-name-input" value="${data.displayName}" data-label="${data.label}">
+                <button class="btn btn-delete" data-label="${data.label}">削除</button>
+            `;
+            participantListContainer.appendChild(row);
+          });
+        }
+
+        function renderMessages() {
+          messagesContainer.innerHTML = "";
+          const replyLineColors = getComputedStyle(document.documentElement)
+            .getPropertyValue("--reply-line-colors")
+            .split(",");
+
+          messages.forEach(msg => {
+            const messageEl = document.createElement("div");
+            messageEl.className = "message";
+            messageEl.style.setProperty("--reply-level", msg.replyLevel);
+
+            const authorData = participants.get(msg.authorLabel);
+            const displayName = authorData
+              ? authorData.displayName
+              : `不明 (${msg.authorLabel})`;
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "message-content-wrapper";
+
+            if (msg.replyLevel > 0) {
+              const line = document.createElement("div");
+              line.className = "reply-line";
+              const colorIndex = (msg.replyLevel - 1) % replyLineColors.length;
+              line.style.backgroundColor = replyLineColors[colorIndex].trim();
+              wrapper.appendChild(line);
+            }
+
+            wrapper.innerHTML += `
+                <div class="message-bubble">
+                    <div class="message-header">
+                        <span class="speaker-name">${displayName}</span>
+                    </div>
+                    <div class="message-content">${msg.content}</div>
+                </div>
+            `;
+            messageEl.appendChild(wrapper);
+            messagesContainer.appendChild(messageEl);
+          });
+        }
+
+        function processAndDisplayChat() {
+          const markdown = chatBlock.innerText;
+          parseChat(markdown);
+          chatTitleElement.textContent = `💬 ${chatTitle}`;
+          renderParticipants();
+          renderMessages();
+        }
+
+        function exportToMarkdown() {
+          const markdownLines = [];
+          markdownLines.push(`# ${chatTitle}`);
+
+          messages.forEach(msg => {
+            const prefix = ">".repeat(msg.replyLevel + 1);
+            const authorData = participants.get(msg.authorLabel);
+            const name = authorData ? authorData.displayName : msg.authorLabel;
+            markdownLines.push(`${prefix} ${name}: ${msg.content}`);
+          });
+
+          const markdownString = markdownLines.join("\n");
+
+          // Copy to clipboard
+          const textarea = document.createElement("textarea");
+          textarea.value = markdownString;
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand("copy");
+            alert("Markdownをクリップボードにコピーしました！");
+          } catch (err) {
+            alert("コピーに失敗しました。");
+          }
+          document.body.removeChild(textarea);
+        }
+
+        chatBlock.addEventListener("click", () => {
+          processAndDisplayChat();
+          chatPanel.classList.add("show");
+        });
+
+        closeButton.addEventListener("click", () =>
+          chatPanel.classList.remove("show")
+        );
+        refreshBtn.addEventListener("click", processAndDisplayChat);
+        exportButton.addEventListener("click", exportToMarkdown);
+
+        addParticipantBtn.addEventListener("click", () => {
+          const newLabel = String.fromCharCode(65 + participants.size);
+          if (!participants.has(newLabel)) {
+            const newName = `話者${newLabel}`;
+            participants.set(newLabel, {
+              label: newLabel,
+              originalName: newName,
+              displayName: newName,
+            });
+            renderParticipants();
+          }
+        });
+
+        participantListContainer.addEventListener("click", e => {
+          if (e.target.classList.contains("btn-delete")) {
+            const label = e.target.dataset.label;
+            participants.delete(label);
+            processAndDisplayChat();
+          }
+        });
+
+        participantListContainer.addEventListener("input", e => {
+          if (e.target.classList.contains("participant-name-input")) {
+            const label = e.target.dataset.label;
+            if (participants.has(label)) {
+              participants.get(label).displayName = e.target.value;
+              renderMessages();
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

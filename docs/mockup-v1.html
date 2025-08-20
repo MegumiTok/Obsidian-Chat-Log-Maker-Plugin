@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>チャットログ再現アプリ モックアップ v4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", "Noto Sans JP", sans-serif;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+      .panel {
+        height: 100vh;
+      }
+      .comment-thread {
+        border-left: 2px solid #e2e8f0;
+        padding-left: 1rem;
+        margin-left: 0.75rem;
+      }
+      .copy-feedback {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.5rem 1.5rem;
+        background-color: #1f2937;
+        color: white;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+      }
+      .copy-feedback.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-1rem);
+      }
+      .speaker-popover {
+        position: absolute;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        z-index: 10;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-100 text-slate-800">
+    <div class="flex flex-col md:flex-row">
+      <!-- Control Panel -->
+      <div
+        class="panel w-full md:w-2/5 p-4 md:p-6 lg:p-8 bg-white overflow-y-auto flex flex-col"
+      >
+        <header class="mb-6">
+          <h1 class="text-2xl font-bold text-slate-900">
+            チャットログメーカー
+          </h1>
+          <p class="text-slate-500 mt-1">
+            会話を再現し、Markdown形式で出力します
+          </p>
+        </header>
+
+        <div class="space-y-6 flex-grow">
+          <div>
+            <label
+              for="chat-title"
+              class="block text-sm font-medium text-slate-700"
+              >スレッドのタイトル</label
+            >
+            <input
+              type="text"
+              id="chat-title"
+              class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm"
+              value="面白い書き間違い"
+            />
+          </div>
+
+          <div>
+            <h3 class="text-sm font-medium text-slate-700 mb-2">
+              登場人物の設定
+            </h3>
+            <div id="speakers-container" class="space-y-2"></div>
+            <button
+              id="add-speaker"
+              class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              + 登場人物を追加
+            </button>
+          </div>
+
+          <div class="flex-grow flex flex-col">
+            <label
+              for="export-output"
+              class="block text-sm font-medium text-slate-700"
+              >エクスポート (Markdown)</label
+            >
+            <textarea
+              id="export-output"
+              rows="10"
+              class="mt-1 block w-full flex-grow px-3 py-2 bg-slate-50 border rounded-md text-sm font-mono leading-relaxed"
+              readonly
+            ></textarea>
+          </div>
+        </div>
+        <div class="mt-6">
+          <button
+            id="copy-button"
+            class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition"
+          >
+            Markdownをコピー
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Panel -->
+      <div
+        class="panel w-full md:w-3/5 p-4 md:p-6 lg:p-8 flex flex-col bg-slate-50"
+      >
+        <header
+          id="preview-header"
+          class="bg-white rounded-t-lg p-4 border-b border-slate-200 shadow-sm flex-shrink-0"
+        >
+          <h2 id="preview-title" class="font-bold text-slate-900 text-lg"></h2>
+        </header>
+        <div
+          class="bg-white flex-grow p-4 overflow-y-auto rounded-b-lg"
+          id="comments-container"
+        >
+          <div id="comments-root"></div>
+          <div class="mt-6" id="top-level-form-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="copy-feedback" class="copy-feedback">コピーしました！</div>
+
+    <script>
+      // --- DOM Elements ---
+      const chatTitleInput = document.getElementById("chat-title");
+      const previewTitle = document.getElementById("preview-title");
+      const exportOutput = document.getElementById("export-output");
+      const commentsRoot = document.getElementById("comments-root");
+      const topLevelFormContainer = document.getElementById(
+        "top-level-form-container"
+      );
+      const copyButton = document.getElementById("copy-button");
+      const copyFeedback = document.getElementById("copy-feedback");
+      const speakersContainer = document.getElementById("speakers-container");
+      const addSpeakerBtn = document.getElementById("add-speaker");
+
+      // --- State ---
+      let speakers = [
+        { key: "A", name: "EastyyBlogspot" },
+        { key: "B", name: "kevinmorrice" },
+        { key: "C", name: "ValhallaIronworks" },
+        { key: "D", name: "seanstoyroom2021" },
+      ];
+      let messages = [
+        {
+          id: 1,
+          speakerKey: "A",
+          text: "My science teacher described my hand writing...",
+          replies: [
+            {
+              id: 2,
+              speakerKey: "B",
+              text: 'mine was described as "an alcoholics attempt..."',
+              replies: [
+                {
+                  id: 3,
+                  speakerKey: "C",
+                  text: "@ValhallaIronworks Have you ever considered...",
+                  replies: [],
+                },
+                {
+                  id: 4,
+                  speakerKey: "B",
+                  text: "@ValhallaIronworks or a teacher...",
+                  replies: [],
+                },
+              ],
+            },
+            {
+              id: 5,
+              speakerKey: "D",
+              text: "If anyone complains about my Left Handed Writing...",
+              replies: [],
+            },
+          ],
+        },
+      ];
+
+      // --- Render Functions ---
+
+      function renderSpeakerInputs() {
+        speakersContainer.innerHTML = "";
+        speakers.forEach(speaker => {
+          const div = document.createElement("div");
+          div.className = "flex items-center space-x-2";
+          div.innerHTML = `
+                    <span class="font-mono text-center w-8 text-slate-500">${speaker.key}</span>
+                    <input type="text" value="${speaker.name}" class="flex-grow px-3 py-1 bg-white border border-slate-300 rounded-md text-sm" data-speaker-key="${speaker.key}" placeholder="表示名 (デフォルト: ${speaker.key})">
+                    <button class="remove-speaker text-slate-400 hover:text-red-500" data-remove-key="${speaker.key}">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                    </button>
+                `;
+          speakersContainer.appendChild(div);
+        });
+      }
+
+      function getSpeakerName(key) {
+        const speaker = speakers.find(s => s.key === key);
+        return speaker ? speaker.name || speaker.key : key;
+      }
+
+      function createCommentHTML(comment) {
+        return `
+                <div class="comment pt-3 relative" data-comment-id="${
+                  comment.id
+                }">
+                    <p class="text-sm font-bold text-slate-700">${getSpeakerName(
+                      comment.speakerKey
+                    )}</p>
+                    <p class="text-sm text-slate-800 mt-1">${comment.text.replace(
+                      /\n/g,
+                      "<br>"
+                    )}</p>
+                    <div class="mt-2 flex items-center">
+                        <button class="reply-btn text-slate-400 hover:text-indigo-600" data-reply-to="${
+                          comment.id
+                        }" title="返信する">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                        </button>
+                        <div class="speaker-popover-container relative"></div>
+                    </div>
+                    <div class="reply-form-container mt-3"></div>
+                    <div class="replies-container mt-2 ${
+                      comment.replies.length > 0 ? "comment-thread" : ""
+                    }"></div>
+                </div>`;
+      }
+
+      function renderCommentsRecursive(parentElement, comments) {
+        comments.forEach(comment => {
+          const commentWrapper = document.createElement("div");
+          commentWrapper.innerHTML = createCommentHTML(comment);
+          const commentElement = commentWrapper.firstElementChild;
+          parentElement.appendChild(commentElement);
+
+          const repliesContainer =
+            commentElement.querySelector(".replies-container");
+          if (comment.replies && comment.replies.length > 0) {
+            renderCommentsRecursive(repliesContainer, comment.replies);
+          }
+        });
+      }
+
+      function renderAllComments() {
+        previewTitle.textContent = chatTitleInput.value || "（タイトルなし）";
+        commentsRoot.innerHTML = "";
+        renderCommentsRecursive(commentsRoot, messages);
+      }
+
+      function generateMarkdownRecursive(comments, level = 0) {
+        let markdown = "";
+        comments.forEach(comment => {
+          const prefix = "> ".repeat(level);
+          const speakerName = getSpeakerName(comment.speakerKey);
+          markdown += `${prefix}${speakerName}: ${comment.text.replace(
+            /\n/g,
+            `\n${prefix}  `
+          )}\n\n`;
+          if (comment.replies && comment.replies.length > 0) {
+            markdown += generateMarkdownRecursive(comment.replies, level + 1);
+          }
+        });
+        return markdown;
+      }
+
+      function renderExportText() {
+        let markdown = `# ${chatTitleInput.value || "(タイトルなし)"}\n\n`;
+        markdown += generateMarkdownRecursive(messages, 0);
+        exportOutput.value = markdown;
+      }
+
+      function renderTopLevelForm() {
+        topLevelFormContainer.innerHTML = `
+                <div class="p-3 bg-slate-100 rounded-lg mt-6 border-t pt-4">
+                    <p class="text-sm font-medium mb-2">新しいコメントを追加</p>
+                    <select class="speaker-selector w-full mb-2 p-2 border rounded-md text-sm"></select>
+                    <textarea class="message-input w-full p-2 border rounded-md text-sm" rows="3" placeholder="コメントを入力..."></textarea>
+                    <div class="mt-2 text-right">
+                        <button class="submit-reply-btn bg-indigo-600 text-white font-bold py-1 px-3 rounded-md text-sm">投稿</button>
+                    </div>
+                </div>
+            `;
+        const form = topLevelFormContainer.firstElementChild;
+        const selector = form.querySelector(".speaker-selector");
+        selector.innerHTML = speakers
+          .map(
+            s => `<option value="${s.key}">${getSpeakerName(s.key)}</option>`
+          )
+          .join("");
+
+        form.querySelector(".submit-reply-btn").onclick = () => {
+          const speakerKey = selector.value;
+          const textarea = form.querySelector(".message-input");
+          const text = textarea.value.trim();
+          if (text) {
+            addComment("root", speakerKey, text);
+            textarea.value = ""; // Clear textarea after submit
+          }
+        };
+      }
+
+      function updateAll() {
+        renderSpeakerInputs();
+        renderAllComments();
+        renderExportText();
+        renderTopLevelForm();
+      }
+
+      // --- Event Handlers & Logic ---
+
+      function handleSpeakerNameChange(e) {
+        const key = e.target.dataset.speakerKey;
+        const speaker = speakers.find(s => s.key === key);
+        if (speaker) {
+          speaker.name = e.target.value;
+          updateAll();
+        }
+      }
+
+      function addNewSpeaker() {
+        let nextCharCode = 65; // 'A'
+        while (
+          speakers.some(s => s.key === String.fromCharCode(nextCharCode))
+        ) {
+          nextCharCode++;
+        }
+        const newKey = String.fromCharCode(nextCharCode);
+        speakers.push({ key: newKey, name: "" });
+        updateAll();
+      }
+
+      function removeSpeaker(keyToRemove) {
+        if (speakers.length <= 1) return; // Don't remove the last speaker
+        speakers = speakers.filter(s => s.key !== keyToRemove);
+        updateAll();
+      }
+
+      function findComment(comments, id) {
+        for (const comment of comments) {
+          if (comment.id === id) return comment;
+          if (comment.replies) {
+            const found = findComment(comment.replies, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+
+      function addComment(parentId, speakerKey, text) {
+        const newComment = { id: Date.now(), speakerKey, text, replies: [] };
+        if (parentId === "root") {
+          messages.push(newComment);
+        } else {
+          const parentComment = findComment(messages, parseInt(parentId));
+          if (parentComment) parentComment.replies.push(newComment);
+        }
+        updateAll();
+      }
+
+      function showReplyForm(container, parentId, speakerKey) {
+        container.innerHTML = `
+                <div class="p-3 bg-slate-100 rounded-lg">
+                    <p class="text-sm font-medium mb-2">返信者: ${getSpeakerName(
+                      speakerKey
+                    )}</p>
+                    <textarea class="message-input w-full p-2 border rounded-md text-sm" rows="3" placeholder="返信を入力..."></textarea>
+                    <div class="mt-2 text-right">
+                        <button class="cancel-reply-btn text-sm text-slate-600 mr-2">キャンセル</button>
+                        <button class="submit-reply-btn bg-indigo-600 text-white font-bold py-1 px-3 rounded-md text-sm">投稿</button>
+                    </div>
+                </div>`;
+        const form = container.firstElementChild;
+        form.querySelector("textarea").focus();
+        form.querySelector(".cancel-reply-btn").onclick = () =>
+          (container.innerHTML = "");
+        form.querySelector(".submit-reply-btn").onclick = () => {
+          const text = form.querySelector("textarea").value.trim();
+          if (text) {
+            addComment(parentId, speakerKey, text);
+          }
+        };
+      }
+
+      function showSpeakerPicker(container, parentId) {
+        const popover = document.createElement("div");
+        popover.className = "speaker-popover";
+        const list = document.createElement("ul");
+        speakers.forEach(speaker => {
+          const item = document.createElement("li");
+          const button = document.createElement("button");
+          button.className =
+            "w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 rounded";
+          button.textContent = `返信者: ${getSpeakerName(speaker.key)}`;
+          button.onclick = () => {
+            const formContainer = container
+              .closest(".comment")
+              .querySelector(".reply-form-container");
+            showReplyForm(formContainer, parentId, speaker.key);
+            container.innerHTML = ""; // Close popover
+          };
+          item.appendChild(button);
+          list.appendChild(item);
+        });
+        popover.appendChild(list);
+        container.innerHTML = "";
+        container.appendChild(popover);
+      }
+
+      function handleReplyClick(e) {
+        const parentId = e.currentTarget.dataset.replyTo;
+        document
+          .querySelectorAll(".speaker-popover-container")
+          .forEach(c => (c.innerHTML = ""));
+        document
+          .querySelectorAll(".reply-form-container")
+          .forEach(c => (c.innerHTML = ""));
+
+        const popoverContainer = e.currentTarget.nextElementSibling;
+        showSpeakerPicker(popoverContainer, parentId);
+      }
+
+      // --- Event Delegation ---
+      document.body.addEventListener("click", e => {
+        if (
+          !e.target.closest(".speaker-popover-container") &&
+          !e.target.closest(".reply-btn")
+        ) {
+          document
+            .querySelectorAll(".speaker-popover-container")
+            .forEach(c => (c.innerHTML = ""));
+        }
+        const replyBtn = e.target.closest(".reply-btn");
+        if (replyBtn) handleReplyClick({ currentTarget: replyBtn });
+      });
+
+      speakersContainer.addEventListener("change", e => {
+        if (e.target.matches("[data-speaker-key]")) handleSpeakerNameChange(e);
+      });
+      speakersContainer.addEventListener("click", e => {
+        const removeBtn = e.target.closest(".remove-speaker");
+        if (removeBtn) removeSpeaker(removeBtn.dataset.removeKey);
+      });
+
+      copyButton.addEventListener("click", () => {
+        navigator.clipboard.writeText(exportOutput.value).then(() => {
+          copyFeedback.classList.add("show");
+          setTimeout(() => copyFeedback.classList.remove("show"), 2000);
+        });
+      });
+
+      // --- Initial Load ---
+      chatTitleInput.addEventListener("input", renderExportText);
+      addSpeakerBtn.addEventListener("click", addNewSpeaker);
+      updateAll();
+    </script>
+  </body>
+</html>
