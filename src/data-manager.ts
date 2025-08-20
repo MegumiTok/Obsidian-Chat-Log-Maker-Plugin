@@ -72,7 +72,7 @@ export class DataManager {
         Math.max(1, (comment.replyLevel || 0) + 1)
       );
 
-      markdown += `${quotePrefix} ${authorName}: ${comment.content}\\n\\n`;
+      markdown += `${quotePrefix} ${authorName}: ${comment.content}\n\n`;
     });
 
     return markdown.trim();
