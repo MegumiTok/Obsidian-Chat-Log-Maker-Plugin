@@ -10,7 +10,7 @@ export class SpeakerSelector {
   }
 
   // Speaker選択ドロップダウンを作成
-  createSelect(container: HTMLElement, className: string = "chat-log-maker-speaker-select"): HTMLSelectElement {
+  createSelect(container: HTMLElement, className = "chat-log-maker-speaker-select"): HTMLSelectElement {
     this.selectElement = container.createEl("select", {
       cls: className,
     });
