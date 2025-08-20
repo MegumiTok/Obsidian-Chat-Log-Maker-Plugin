@@ -131,6 +131,7 @@ export class ChatLogMakerView extends ItemView {
         nameInput.addEventListener("input", e => {
           this.characters[index].name = (e.target as HTMLInputElement).value;
           this.updateChatDisplay();
+          this.updateSpeakerSelect(); // 話者選択も更新
         });
 
         const deleteBtn = participantItem.createEl("button", {
@@ -142,6 +143,7 @@ export class ChatLogMakerView extends ItemView {
             this.characters.splice(index, 1);
             updateParticipantsList();
             this.updateChatDisplay();
+            this.updateSpeakerSelect(); // 話者選択も更新
           }
         });
       });
@@ -158,6 +160,7 @@ export class ChatLogMakerView extends ItemView {
       const nextId = String.fromCharCode(65 + this.characters.length); // A, B, C...
       this.characters.push({ id: nextId, name: "" });
       updateParticipantsList();
+      this.updateSpeakerSelect(); // 話者選択も更新
     });
   }
 
@@ -171,21 +174,13 @@ export class ChatLogMakerView extends ItemView {
 
     // メッセージ表示エリア（スクロール可能）
     const messagesContainer = container.createDiv("chat-log-maker-messages");
+    
+    // 投稿フォーム
+    const postForm = container.createDiv("chat-log-maker-post-form");
+    this.createPostForm(postForm);
 
     // 初期メッセージ
-    if (this.comments.length === 0) {
-      const welcomeMessage = messagesContainer.createDiv(
-        "chat-log-maker-message"
-      );
-      welcomeMessage.createDiv({
-        text: "A",
-        cls: "chat-log-maker-message-author",
-      });
-      welcomeMessage.createDiv({
-        text: "チャットログが表示されます。登場人物を編集してメッセージを追加してください。",
-        cls: "chat-log-maker-message-content",
-      });
-    }
+    this.renderMessages(messagesContainer);
 
     // チャット表示更新関数を設定
     this.updateChatDisplay = () => {
@@ -195,41 +190,201 @@ export class ChatLogMakerView extends ItemView {
         : "💬 タイトルなし";
 
       // メッセージ更新
-      messagesContainer.empty();
-      if (this.comments.length === 0) {
-        const welcomeMessage = messagesContainer.createDiv(
-          "chat-log-maker-message"
-        );
-        welcomeMessage.createDiv({
-          text: "A",
-          cls: "chat-log-maker-message-author",
-        });
-        welcomeMessage.createDiv({
-          text: "チャットログが表示されます。登場人物を編集してメッセージを追加してください。",
-          cls: "chat-log-maker-message-content",
-        });
-      } else {
-        this.comments.forEach(comment => {
-          const messageDiv = messagesContainer.createDiv(
-            "chat-log-maker-message"
-          );
-
-          const authorName =
-            this.characters.find(c => c.id === comment.author)?.name ||
-            comment.author;
-          messageDiv.createDiv({
-            text: authorName,
-            cls: "chat-log-maker-message-author",
-          });
-
-          messageDiv.createDiv({
-            text: comment.content,
-            cls: "chat-log-maker-message-content",
-          });
-        });
-      }
+      this.renderMessages(messagesContainer);
     };
   }
+
+  // メッセージ表示の共通処理
+  private renderMessages(messagesContainer: HTMLElement) {
+    messagesContainer.empty();
+    if (this.comments.length === 0) {
+      const welcomeMessage = messagesContainer.createDiv("chat-log-maker-message");
+      welcomeMessage.createDiv({
+        text: "A",
+        cls: "chat-log-maker-message-author",
+      });
+      welcomeMessage.createDiv({
+        text: "チャットログが表示されます。下のフォームからメッセージを投稿してください。",
+        cls: "chat-log-maker-message-content",
+      });
+    } else {
+      this.comments.forEach((comment, index) => {
+        const messageDiv = messagesContainer.createDiv("chat-log-maker-message");
+
+        // メッセージヘッダー（話者名とアクションボタン）
+        const messageHeader = messageDiv.createDiv("chat-log-maker-message-header");
+        
+        const authorName =
+          this.characters.find(c => c.id === comment.author)?.name ||
+          comment.author;
+        messageHeader.createDiv({
+          text: authorName,
+          cls: "chat-log-maker-message-author",
+        });
+
+        // アクションボタン
+        const messageActions = messageHeader.createDiv("chat-log-maker-message-actions");
+        const editBtn = messageActions.createEl("button", {
+          text: "編集",
+          cls: "chat-log-maker-edit-btn"
+        });
+        const deleteBtn = messageActions.createEl("button", {
+          text: "削除",
+          cls: "chat-log-maker-delete-btn"
+        });
+
+        // メッセージ内容
+        const contentDiv = messageDiv.createDiv({
+          text: comment.content,
+          cls: "chat-log-maker-message-content",
+        });
+
+        // 編集ボタンのイベント
+        editBtn.addEventListener("click", () => {
+          this.enableEditMode(messageDiv, comment, index);
+        });
+
+        // 削除ボタンのイベント
+        deleteBtn.addEventListener("click", () => {
+          this.comments.splice(index, 1);
+          this.updateChatDisplay();
+        });
+      });
+    }
+  }
+
+  // 編集モードの有効化
+  private enableEditMode(messageDiv: HTMLElement, comment: Comment, index: number) {
+    // 既存のコンテンツを取得
+    const contentDiv = messageDiv.querySelector('.chat-log-maker-message-content') as HTMLElement;
+    const originalContent = comment.content;
+
+    // 編集フォームを作成
+    const editForm = messageDiv.createDiv("chat-log-maker-edit-form");
+    
+    // 話者選択
+    const speakerContainer = editForm.createDiv("chat-log-maker-edit-row");
+    speakerContainer.createEl("label", { text: "話者:", cls: "chat-log-maker-form-label" });
+    const speakerSelect = speakerContainer.createEl("select", {
+      cls: "chat-log-maker-speaker-select"
+    });
+    
+    // 話者選択の初期化
+    this.characters.forEach(character => {
+      const option = speakerSelect.createEl("option");
+      option.value = character.id;
+      option.textContent = character.name || character.id;
+      if (character.id === comment.author) {
+        option.selected = true;
+      }
+    });
+
+    // メッセージ編集
+    const messageContainer = editForm.createDiv("chat-log-maker-edit-row");
+    messageContainer.createEl("label", { text: "メッセージ:", cls: "chat-log-maker-form-label" });
+    const textarea = messageContainer.createEl("textarea", {
+      cls: "chat-log-maker-message-input",
+      text: originalContent
+    });
+
+    // ボタンエリア
+    const buttonContainer = editForm.createDiv("chat-log-maker-edit-buttons");
+    const saveBtn = buttonContainer.createEl("button", {
+      text: "保存",
+      cls: "chat-log-maker-save-btn"
+    });
+    const cancelBtn = buttonContainer.createEl("button", {
+      text: "キャンセル",
+      cls: "chat-log-maker-cancel-btn"
+    });
+
+    // 元のコンテンツを隠す
+    contentDiv.style.display = "none";
+
+    // 保存ボタンのイベント
+    saveBtn.addEventListener("click", () => {
+      const newContent = textarea.value.trim();
+      const newAuthor = speakerSelect.value;
+      
+      if (newContent) {
+        this.comments[index].content = newContent;
+        this.comments[index].author = newAuthor;
+        this.updateChatDisplay();
+      }
+    });
+
+    // キャンセルボタンのイベント
+    cancelBtn.addEventListener("click", () => {
+      this.updateChatDisplay();
+    });
+
+    // テキストエリアにフォーカス
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  }
+
+  // 投稿フォームの作成
+  private createPostForm(container: HTMLElement) {
+    // 話者選択
+    const speakerContainer = container.createDiv("chat-log-maker-form-row");
+    speakerContainer.createEl("label", { text: "話者:", cls: "chat-log-maker-form-label" });
+    const speakerSelect = speakerContainer.createEl("select", {
+      cls: "chat-log-maker-speaker-select"
+    });
+
+    // メッセージ入力
+    const messageContainer = container.createDiv("chat-log-maker-form-row");
+    messageContainer.createEl("label", { text: "メッセージ:", cls: "chat-log-maker-form-label" });
+    const messageInput = messageContainer.createEl("textarea", {
+      cls: "chat-log-maker-message-input",
+      attr: { placeholder: "メッセージを入力してください..." }
+    });
+
+    // ボタンエリア
+    const buttonContainer = container.createDiv("chat-log-maker-form-buttons");
+    const postBtn = buttonContainer.createEl("button", {
+      text: "投稿",
+      cls: "chat-log-maker-post-button"
+    });
+
+    // 話者選択の更新関数
+    const updateSpeakerSelect = () => {
+      speakerSelect.empty();
+      this.characters.forEach(character => {
+        const option = speakerSelect.createEl("option");
+        option.value = character.id;
+        option.textContent = character.name || character.id;
+      });
+    };
+
+    // 初期化
+    updateSpeakerSelect();
+
+    // 投稿ボタンのイベント
+    postBtn.addEventListener("click", () => {
+      const selectedSpeaker = speakerSelect.value;
+      const message = messageInput.value.trim();
+      
+      if (message) {
+        const newComment: Comment = {
+          id: Date.now().toString(),
+          author: selectedSpeaker,
+          content: message,
+          timestamp: Date.now()
+        };
+        
+        this.comments.push(newComment);
+        this.updateChatDisplay();
+        messageInput.value = "";
+      }
+    });
+
+    // 登場人物が変更されたときに話者選択も更新
+    this.updateSpeakerSelect = updateSpeakerSelect;
+  }
+
+  // 話者選択更新関数
+  private updateSpeakerSelect: () => void = () => {};
 
   // Markdown生成
   private generateMarkdown(): string {

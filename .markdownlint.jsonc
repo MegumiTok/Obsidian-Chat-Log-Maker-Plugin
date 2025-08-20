@@ -1,7 +1,10 @@
 {
   // Markdownlint configuration for Obsidian Chat Log Maker Plugin
   "default": true,
-  
+
+  // 番号付きリストの自動連番強制無効化
+  "MD029": false,
+
   // Enforce single space after list markers (standard markdown)
   "MD030": {
     "ul_single": 1,
