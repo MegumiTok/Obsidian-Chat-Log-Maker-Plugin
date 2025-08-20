@@ -11,6 +11,3 @@
 @import url("./src/styles/messages.css");
 @import url("./src/styles/forms.css");
 @import url("./src/styles/buttons.css");
-
-/* 4. レスポンシブ対応（最後に適用） */
-@import url("./src/styles/responsive.css");

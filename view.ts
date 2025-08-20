@@ -83,12 +83,15 @@ export class ChatLogMakerView extends ItemView {
   }
 
   private createSpeakerSection(container: HTMLElement): void {
-    container.createEl("h3", {
+    // Speaker section全体のコンテナ
+    const speakersSection = container.createDiv("chat-log-maker-speakers");
+    
+    speakersSection.createEl("h3", {
       text: "👥 Speakers",
       cls: "chat-log-maker-section-title",
     });
 
-    const speakersContainer = container.createDiv("chat-log-maker-speakers-list");
+    const speakersContainer = speakersSection.createDiv("chat-log-maker-speakers-list");
 
     // 固定5人のSpeaker名前編集
     this.dataManager.getSpeakers().forEach((speaker, index) => {

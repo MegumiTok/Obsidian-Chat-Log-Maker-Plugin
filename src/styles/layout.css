@@ -6,6 +6,7 @@
   flex-direction: column;
   height: 100%;
   padding: var(--chat-log-spacing-lg);
+  box-sizing: border-box;
   background: var(--background-primary);
 }
 

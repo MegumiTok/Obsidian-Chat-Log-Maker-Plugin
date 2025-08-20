@@ -2,7 +2,7 @@
 
 /* プラグイン専用のCSS変数 */
 :root {
-  /* 間隔設定 */
+  /* 間隔設定  */
   --chat-log-spacing-xs: 4px;
   --chat-log-spacing-sm: 8px;
   --chat-log-spacing-md: 12px;

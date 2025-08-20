@@ -1,5 +1,17 @@
 /* Speaker管理関連のスタイル */
 
+/* Speaker設定セクション全体 */
+.chat-log-maker-speakers {
+  height: var(--chat-log-speaker-section-height);
+  background: var(--background-secondary);
+  border-radius: var(--chat-log-border-radius-xl);
+  border: 1px solid var(--background-modifier-border);
+  padding: var(--chat-log-spacing-lg);
+  margin-bottom: var(--chat-log-spacing-lg);
+  display: flex;
+  flex-direction: column;
+}
+
 /* Speaker設定セクション */
 .chat-log-maker-speakers-list {
   flex: 1;
