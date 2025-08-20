@@ -49,18 +49,6 @@
   min-height: 300px;
 }
 
-/* リフレッシュエリア（固定高さ60px） */
-.chat-log-maker-refresh-area {
-  height: 60px;
-  background: var(--background-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--background-modifier-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
 /* スクロールバーのスタイリング */
 .chat-log-maker-messages::-webkit-scrollbar {
   width: 6px;
@@ -254,7 +242,6 @@
 
 /* アクセントボタン（主要アクション） */
 .chat-log-maker-export-btn,
-.chat-log-maker-refresh-btn,
 .chat-log-maker-post-button,
 .chat-log-maker-reply-submit-btn,
 .chat-log-maker-save-btn {
@@ -308,7 +295,6 @@
 }
 
 /* --- ボタン個別サイズ調整 --- */
-.chat-log-maker-refresh-btn,
 .chat-log-maker-post-button {
   padding: 8px 16px;
   font-size: 14px;
@@ -316,7 +302,6 @@
 
 /* --- ボタンホバー効果 --- */
 .chat-log-maker-export-btn:hover,
-.chat-log-maker-refresh-btn:hover,
 .chat-log-maker-post-button:hover,
 .chat-log-maker-reply-submit-btn:hover,
 .chat-log-maker-save-btn:hover,

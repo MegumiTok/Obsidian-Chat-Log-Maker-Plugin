@@ -46,17 +46,6 @@ export class ChatLogMakerView extends ItemView {
     // チャット表示エリア（可変高さ、スクロール可能）
     const chatArea = mainContainer.createDiv("chat-log-maker-chat-area");
     this.createChatArea(chatArea);
-
-    // リフレッシュエリア（固定高さ60px）
-    const refreshArea = mainContainer.createDiv("chat-log-maker-refresh-area");
-    const refreshBtn = refreshArea.createEl("button", {
-      text: "Refresh",
-      cls: "chat-log-maker-refresh-btn",
-    });
-
-    refreshBtn.addEventListener("click", () => {
-      this.updateDisplay();
-    });
   }
 
   private createHeader(container: HTMLElement): void {
