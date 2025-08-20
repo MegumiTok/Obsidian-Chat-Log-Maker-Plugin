@@ -1,8 +1,224 @@
-/*
+/* Chat Log Maker Plugin Styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.chat-log-maker-container {
+  display: flex;
+  height: 100%;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+}
 
-If your plugin does not need CSS, delete this file.
+/* コントロールパネル（左側） */
+.chat-log-maker-control-panel {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--background-modifier-border);
+}
 
-*/
+/* プレビューパネル（右側） */
+.chat-log-maker-preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--background-primary);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+/* セクション共通スタイル */
+.chat-log-maker-section {
+  margin-bottom: 16px;
+}
+
+.chat-log-maker-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+/* タイトル入力 */
+.chat-log-maker-title-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 14px;
+}
+
+/* 登場人物リスト */
+.chat-log-maker-characters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-log-maker-character-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--background-primary);
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.chat-log-maker-character-id {
+  font-weight: 600;
+  color: var(--text-accent);
+  min-width: 20px;
+}
+
+.chat-log-maker-character-name {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  font-size: 12px;
+}
+
+.chat-log-maker-character-delete {
+  background: var(--background-modifier-error);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.chat-log-maker-add-character {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* Markdown出力エリア */
+.chat-log-maker-markdown-output {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  resize: none;
+  min-height: 200px;
+}
+
+.chat-log-maker-copy-button {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* プレビューエリア */
+.chat-log-maker-comments {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  min-height: 300px;
+}
+
+.chat-log-maker-comment {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--background-primary);
+  border-radius: 8px;
+  border-left: 3px solid var(--interactive-accent);
+}
+
+.chat-log-maker-comment-author {
+  font-weight: 600;
+  color: var(--text-accent);
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.chat-log-maker-comment-content {
+  color: var(--text-normal);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* 投稿フォーム */
+.chat-log-maker-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+}
+
+.chat-log-maker-speaker-select {
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 14px;
+}
+
+.chat-log-maker-message-input {
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 14px;
+  min-height: 60px;
+  resize: vertical;
+}
+
+.chat-log-maker-post-button {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  align-self: flex-end;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .chat-log-maker-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .chat-log-maker-control-panel {
+    flex: none;
+    order: 2;
+  }
+  
+  .chat-log-maker-preview-panel {
+    order: 1;
+  }
+}
