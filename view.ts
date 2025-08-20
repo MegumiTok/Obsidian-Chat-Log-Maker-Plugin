@@ -142,6 +142,23 @@ export class ChatLogMakerView extends ItemView {
         });
         deleteBtn.addEventListener("click", () => {
           if (this.characters.length > 1) {
+            // 使用中の登場人物かチェック
+            const isUsed = this.comments.some(comment => comment.author === character.id);
+            
+            if (isUsed) {
+              // 使用中の場合は警告
+              const confirmDelete = confirm(
+                `Character "${character.name || character.id}" is used in existing messages. Are you sure you want to delete?`
+              );
+              if (!confirmDelete) return;
+            } else {
+              // 未使用の場合も念のため確認
+              const confirmDelete = confirm(
+                `Are you sure you want to delete character "${character.name || character.id}"?`
+              );
+              if (!confirmDelete) return;
+            }
+            
             this.characters.splice(index, 1);
             updateParticipantsList();
             this.updateChatDisplay();
@@ -277,8 +294,14 @@ export class ChatLogMakerView extends ItemView {
 
         // 削除ボタンのイベント
         deleteBtn.addEventListener("click", () => {
-          this.comments.splice(index, 1);
-          this.updateChatDisplay();
+          const authorName = this.characters.find(c => c.id === comment.author)?.name || comment.author;
+          const confirmDelete = confirm(
+            `Are you sure you want to delete this message from ${authorName}?`
+          );
+          if (confirmDelete) {
+            this.comments.splice(index, 1);
+            this.updateChatDisplay();
+          }
         });
       });
     }
@@ -325,12 +348,32 @@ export class ChatLogMakerView extends ItemView {
       cls: "chat-log-maker-speaker-select",
     });
 
-    // 話者選択の初期化
-    this.characters.forEach(character => {
+    // 話者選択の初期化（使用実績順）
+    const usedCharacterIds = new Set(this.comments.map(comment => comment.author));
+    const usedCharacters = this.characters.filter(character => usedCharacterIds.has(character.id));
+    const unusedCharacters = this.characters.filter(character => !usedCharacterIds.has(character.id));
+    
+    // 使用実績のある登場人物を先に追加
+    usedCharacters.forEach(character => {
       const option = speakerSelect.createEl("option");
       option.value = character.id;
       option.textContent = character.name || character.id;
     });
+    
+    // 未使用の登場人物は区切り線の後に追加
+    if (unusedCharacters.length > 0) {
+      if (usedCharacters.length > 0) {
+        const divider = speakerSelect.createEl("option");
+        divider.disabled = true;
+        divider.textContent = "--- Unused ---";
+      }
+      
+      unusedCharacters.forEach(character => {
+        const option = speakerSelect.createEl("option");
+        option.value = character.id;
+        option.textContent = character.name || character.id;
+      });
+    }
 
     // メッセージ入力
     const messageContainer = replyForm.createDiv("chat-log-maker-form-row");
@@ -515,11 +558,35 @@ export class ChatLogMakerView extends ItemView {
     // 話者選択の更新関数
     const updateSpeakerSelect = () => {
       speakerSelect.empty();
-      this.characters.forEach(character => {
+      
+      // メッセージ投稿実績のある登場人物を取得
+      const usedCharacterIds = new Set(this.comments.map(comment => comment.author));
+      
+      // 実績のある登場人物を先に表示
+      const usedCharacters = this.characters.filter(character => usedCharacterIds.has(character.id));
+      const unusedCharacters = this.characters.filter(character => !usedCharacterIds.has(character.id));
+      
+      // 使用実績のある登場人物を先に追加
+      usedCharacters.forEach(character => {
         const option = speakerSelect.createEl("option");
         option.value = character.id;
         option.textContent = character.name || character.id;
       });
+      
+      // 未使用の登場人物は区切り線の後に追加（最初の投稿時は全て表示）
+      if (this.comments.length === 0 || unusedCharacters.length > 0) {
+        if (this.comments.length > 0 && usedCharacters.length > 0) {
+          const divider = speakerSelect.createEl("option");
+          divider.disabled = true;
+          divider.textContent = "--- Unused ---";
+        }
+        
+        unusedCharacters.forEach(character => {
+          const option = speakerSelect.createEl("option");
+          option.value = character.id;
+          option.textContent = character.name || character.id;
+        });
+      }
     };
 
     // 初期化
@@ -541,6 +608,7 @@ export class ChatLogMakerView extends ItemView {
 
         this.comments.push(newComment);
         this.updateChatDisplay();
+        this.updateSpeakerSelect(); // 投稿後に話者選択を更新
         messageInput.value = "";
       }
     });
@@ -572,7 +640,11 @@ export class ChatLogMakerView extends ItemView {
       const authorName =
         this.characters.find(c => c.id === comment.author)?.name ||
         comment.author;
-      markdown += `> ${authorName}: ${comment.content}\n\n`;
+      
+      // 階層レベルに応じて > の数を調整
+      const quotePrefix = ">".repeat(Math.max(1, (comment.replyLevel || 0) + 1));
+      
+      markdown += `${quotePrefix} ${authorName}: ${comment.content}\n\n`;
     });
 
     return markdown.trim();
