@@ -12,6 +12,10 @@ export class ChatLogMakerView extends ItemView {
 
   // UI要素
   private messagesContainer: HTMLElement | null = null;
+  private postFormContainer: HTMLElement | null = null;
+  
+  // フォーム開閉状態
+  private isFormExpanded: boolean = false;
 
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
@@ -52,9 +56,21 @@ export class ChatLogMakerView extends ItemView {
     });
 
     const headerButtons = headerArea.createDiv("chat-log-maker-header-buttons");
+    
+    // Add Message トグルボタン
+    const addMessageBtn = headerButtons.createEl("button", {
+      text: "+ Add Message",
+      cls: "chat-log-maker-add-message-btn",
+    });
+    
     const exportBtn = headerButtons.createEl("button", {
       text: "📋 Export",
       cls: "chat-log-maker-export-btn",
+    });
+
+    // Add Message ボタンのイベント
+    addMessageBtn.addEventListener("click", () => {
+      this.toggleFormVisibility();
     });
 
     exportBtn.addEventListener("click", () => {
@@ -72,9 +88,13 @@ export class ChatLogMakerView extends ItemView {
     this.messagesContainer = container.createDiv("chat-log-maker-messages");
 
     // 投稿フォーム
-    const postFormContainer = container.createDiv("chat-log-maker-post-form");
+    this.postFormContainer = container.createDiv("chat-log-maker-post-form");
+    
+    // 初期状態でフォームを隠す
+    this.postFormContainer.addClass("chat-log-maker-form-collapsed");
+    
     this.postForm = new PostForm(
-      postFormContainer,
+      this.postFormContainer,
       this.dataManager.getSpeakers(),
       (comment: Comment) => {
         this.dataManager.addComment(comment);
@@ -146,6 +166,31 @@ export class ChatLogMakerView extends ItemView {
   private updatePostFormSpeakers(): void {
     if (this.postForm) {
       this.postForm.updateSpeakers(this.dataManager.getSpeakers());
+    }
+  }
+
+  // フォームの表示/非表示を切り替え
+  private toggleFormVisibility(): void {
+    if (!this.postFormContainer) return;
+
+    this.isFormExpanded = !this.isFormExpanded;
+    
+    if (this.isFormExpanded) {
+      this.postFormContainer.removeClass("chat-log-maker-form-collapsed");
+      this.postFormContainer.addClass("chat-log-maker-form-expanded");
+    } else {
+      this.postFormContainer.removeClass("chat-log-maker-form-expanded");
+      this.postFormContainer.addClass("chat-log-maker-form-collapsed");
+    }
+
+    // ボタンのテキストを更新
+    this.updateAddMessageButtonText();
+  }
+
+  private updateAddMessageButtonText(): void {
+    const addMessageBtn = document.querySelector(".chat-log-maker-add-message-btn") as HTMLElement;
+    if (addMessageBtn) {
+      addMessageBtn.textContent = this.isFormExpanded ? "− Hide Form" : "+ Add Message";
     }
   }
 

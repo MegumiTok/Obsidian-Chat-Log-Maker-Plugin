@@ -168,6 +168,23 @@
   padding: 12px;
   gap: 8px;
   margin-top: 12px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* 折りたたまれた状態 */
+.chat-log-maker-form-collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+}
+
+/* 展開された状態 */
+.chat-log-maker-form-expanded {
+  max-height: 500px;
+  opacity: 1;
 }
 
 .chat-log-maker-reply-form {
@@ -247,7 +264,8 @@
 .chat-log-maker-export-btn,
 .chat-log-maker-post-button,
 .chat-log-maker-reply-submit-btn,
-.chat-log-maker-save-btn {
+.chat-log-maker-save-btn,
+.chat-log-maker-add-message-btn {
   background: var(--interactive-accent);
   color: var(--text-on-accent);
   border: none;
@@ -308,6 +326,7 @@
 .chat-log-maker-post-button:hover,
 .chat-log-maker-reply-submit-btn:hover,
 .chat-log-maker-save-btn:hover,
+.chat-log-maker-add-message-btn:hover,
 .chat-log-maker-cancel-btn:hover {
   opacity: 0.8;
 }
