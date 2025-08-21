@@ -112,7 +112,8 @@ export class ChatLogMakerView extends ItemView {
           this.updateDisplay();
         },
         onReplySubmit: (parentIndex: number, reply: Comment) => {
-          this.dataManager.insertComment(parentIndex + 1, reply);
+          // 返信は配列の最後に追加する
+          this.dataManager.addComment(reply);
           this.updateDisplay();
         },
         onNewSpeaker: () => {
