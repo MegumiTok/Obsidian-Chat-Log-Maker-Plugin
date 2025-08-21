@@ -88,7 +88,11 @@ export class DataManager {
 
   // Markdown生成
   generateMarkdown(): string {
-    let markdown = "";
+    if (this.comments.length === 0) {
+      return "```chat\n\n```";
+    }
+
+    let chatContent = "";
 
     this.comments.forEach(comment => {
       const authorName = this.getSpeakerNameById(comment.author);
@@ -98,9 +102,10 @@ export class DataManager {
         Math.max(1, (comment.replyLevel || 0) + 1)
       );
 
-      markdown += `${quotePrefix} ${authorName}: ${comment.content}\n\n`;
+      chatContent += `${quotePrefix} ${authorName}: ${comment.content}\n`;
     });
 
-    return markdown.trim();
+    // ```chat ブロックで囲む
+    return `\`\`\`chat\n${chatContent.trim()}\n\`\`\``;
   }
 }
