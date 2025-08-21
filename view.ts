@@ -202,6 +202,22 @@ export class ChatLogMakerView extends ItemView {
   async onClose() {
     // 必要であれば、後片付けの処理をここに書きます
   }
+
+  /**
+   * Markdownの```chatブロックからチャット内容を読み込む
+   */
+  loadChatContent(chatContent: string): void {
+    const success = this.dataManager.loadFromMarkdown(`\`\`\`chat\n${chatContent}\n\`\`\``);
+    
+    if (success) {
+      this.updateDisplay();
+      this.updatePostFormSpeakers();
+      
+      // フォームを非表示にして、チャット表示を強調
+      this.isFormExpanded = false;
+      this.toggleFormVisibility();
+    }
+  }
 }
 
 // 互換性のためにエクスポート

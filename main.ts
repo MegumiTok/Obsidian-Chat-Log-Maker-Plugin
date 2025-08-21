@@ -1,14 +1,21 @@
 import { Plugin } from "obsidian";
 import { ChatLogMakerView, CHAT_LOG_MAKER_VIEW_TYPE } from "./view";
+import { ChatBlockExtension } from "./src/chat-block-extension";
 
 // メインのプラグインクラス
 export default class ChatLogMakerPlugin extends Plugin {
+  private chatBlockExtension: ChatBlockExtension;
+
   async onload() {
     // ビューを登録します
     this.registerView(
       CHAT_LOG_MAKER_VIEW_TYPE,
       leaf => new ChatLogMakerView(leaf)
     );
+
+    // CodeMirror拡張を初期化・登録
+    this.chatBlockExtension = new ChatBlockExtension(this);
+    this.registerEditorExtension(this.chatBlockExtension.createExtension());
 
     // コマンドパレットに表示されるコマンドを追加
     this.addCommand({

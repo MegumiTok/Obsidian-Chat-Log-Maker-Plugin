@@ -1,4 +1,5 @@
 import { Speaker, Comment } from "./types";
+import { ChatParser } from "./chat-parser";
 
 // データ管理クラス：Speakerとコメントの管理を担当
 export class DataManager {
@@ -107,5 +108,21 @@ export class DataManager {
 
     // ```chat ブロックで囲む
     return `\`\`\`chat\n${chatContent.trim()}\n\`\`\``;
+  }
+
+  // Markdownからの読み込み
+  loadFromMarkdown(markdown: string): boolean {
+    const parser = new ChatParser();
+    const result = parser.parseMarkdown(markdown);
+
+    if (result.comments.length === 0) {
+      return false; // 解析できるデータがない
+    }
+
+    // データを置き換え
+    this.comments = result.comments;
+    this.speakers = result.speakers.length > 0 ? result.speakers : [{ id: "A", name: "" }];
+
+    return true;
   }
 }

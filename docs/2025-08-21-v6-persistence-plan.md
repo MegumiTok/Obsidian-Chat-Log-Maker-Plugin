@@ -12,7 +12,7 @@ Markdown の chat コードブロックと UI 間の連携機能を実装し、�
 
 ## Step by Step 実装計画
 
-### Step 1: Export Format 改善
+### Step 1: Export Format 改善 （✅ 実装済み）
 
 - **目標**: エクスポート時に ```chat ブロックで出力
 - **実装**:
@@ -20,16 +20,23 @@ Markdown の chat コードブロックと UI 間の連携機能を実装し、�
   - `chat\n{content}\n` 形式に変更
 - **テスト**: エクスポートボタンでフォーマット確認
 
-### Step 2: Markdown 解析機能
+### Step 2: Markdown 解析機能 （WIP → 修正中）
 
-- **目標**: chat コードブロックの認識・パース
+- **目標**: Markdownファイル内の```chatブロックからの直接解析・表示
 - **実装**:
+  - Step 2-1: ChatParser クラス作成 ✅
+  - Step 2-2: CodeMirror拡張で```chatブロック検出
+  - Step 2-3: ブロッククリック時の自動パネル表示
+  - Step 2-4: フォーカスされたブロックのみ解析・表示
 
-  - ChatParser クラス作成
-  - `chat` ブロック内の `>` 記法を Comment 配列に変換
-  - Speaker 自動検出（A, B, C...順）
+- **使用フロー**: 
+  1. Markdownファイルを開く
+  2. ````chatブロック`をクリック/フォーカス
+  3. 右側にChat Log Previewパネルが自動表示
+  4. フォーカスしたブロックの内容が解析され表示
+  5. 複数ブロックがある場合、フォーカス部分のみ対象
 
-- **テスト**: サンプル Markdown の解析確認
+- **テスト**: mockup-v2.htmlの動作を再現
 
 ### Step 3: Load 機能追加
 
