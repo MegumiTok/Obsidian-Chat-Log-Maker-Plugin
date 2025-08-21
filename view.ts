@@ -13,9 +13,9 @@ export class ChatLogMakerView extends ItemView {
   // UI要素
   private messagesContainer: HTMLElement | null = null;
   private postFormContainer: HTMLElement | null = null;
-  
+
   // フォーム開閉状態
-  private isFormExpanded: boolean = false;
+  private isFormExpanded = true;
 
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
@@ -56,13 +56,13 @@ export class ChatLogMakerView extends ItemView {
     });
 
     const headerButtons = headerArea.createDiv("chat-log-maker-header-buttons");
-    
+
     // Add Message トグルボタン
     const addMessageBtn = headerButtons.createEl("button", {
-      text: "+ Add Message",
+      text: "− Hide Form", // 初期状態で展開されているので Hide Form
       cls: "chat-log-maker-add-message-btn",
     });
-    
+
     const exportBtn = headerButtons.createEl("button", {
       text: "📋 Export",
       cls: "chat-log-maker-export-btn",
@@ -89,10 +89,10 @@ export class ChatLogMakerView extends ItemView {
 
     // 投稿フォーム
     this.postFormContainer = container.createDiv("chat-log-maker-post-form");
-    
-    // 初期状態でフォームを隠す
-    this.postFormContainer.addClass("chat-log-maker-form-collapsed");
-    
+
+    // 初期状態でフォームを表示
+    this.postFormContainer.addClass("chat-log-maker-form-expanded");
+
     this.postForm = new PostForm(
       this.postFormContainer,
       this.dataManager.getSpeakers(),
@@ -174,7 +174,7 @@ export class ChatLogMakerView extends ItemView {
     if (!this.postFormContainer) return;
 
     this.isFormExpanded = !this.isFormExpanded;
-    
+
     if (this.isFormExpanded) {
       this.postFormContainer.removeClass("chat-log-maker-form-collapsed");
       this.postFormContainer.addClass("chat-log-maker-form-expanded");
@@ -188,9 +188,13 @@ export class ChatLogMakerView extends ItemView {
   }
 
   private updateAddMessageButtonText(): void {
-    const addMessageBtn = document.querySelector(".chat-log-maker-add-message-btn") as HTMLElement;
+    const addMessageBtn = document.querySelector(
+      ".chat-log-maker-add-message-btn"
+    ) as HTMLElement;
     if (addMessageBtn) {
-      addMessageBtn.textContent = this.isFormExpanded ? "− Hide Form" : "+ Add Message";
+      addMessageBtn.textContent = this.isFormExpanded
+        ? "− Hide Form"
+        : "+ Add Message";
     }
   }
 
