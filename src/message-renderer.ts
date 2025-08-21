@@ -101,8 +101,12 @@ export class MessageRenderer {
       cls: "chat-log-maker-message-author",
     });
 
-    // 編集・削除ボタン（ヘッダー内）
+    // 返信・編集・削除ボタン（ヘッダー内）
     const messageActions = messageHeader.createDiv("chat-log-maker-message-actions");
+    const replyBtn = messageActions.createEl("button", {
+      text: "Reply",
+      cls: "chat-log-maker-reply-btn",
+    });
     const editBtn = messageActions.createEl("button", {
       text: "Edit",
       cls: "chat-log-maker-edit-btn",
@@ -116,13 +120,6 @@ export class MessageRenderer {
     messageDiv.createDiv({
       text: comment.content,
       cls: "chat-log-maker-message-content",
-    });
-
-    // 返信ボタン（メッセージの下）
-    const messageFooter = messageDiv.createDiv("chat-log-maker-message-footer");
-    const replyBtn = messageFooter.createEl("button", {
-      text: "Reply",
-      cls: "chat-log-maker-reply-btn",
     });
 
     // イベントリスナー設定
@@ -341,7 +338,6 @@ export class MessageRenderer {
     });
     
     const speakerSelector = new SpeakerSelector(this.speakers, this.onNewSpeaker);
-    const selectElement = speakerSelector.createSelect(speakerContainer);
     speakerSelector.setValue(comment.author);
 
     // メッセージ編集
