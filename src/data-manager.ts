@@ -6,13 +6,9 @@ export class DataManager {
   private comments: Comment[] = [];
 
   constructor() {
-    // 固定5人のSpeakerを設定
+    // 最初はAのみ設定
     this.speakers = [
       { id: "A", name: "" },
-      { id: "B", name: "" },
-      { id: "C", name: "" },
-      { id: "D", name: "" },
-      { id: "E", name: "" },
     ];
   }
 
@@ -33,6 +29,36 @@ export class DataManager {
 
   getSpeakerNameById(id: string): string {
     return this.getSpeakerById(id)?.name || id;
+  }
+
+  // 次のスピーカーを追加する（A→B→C...Z）
+  addNextSpeaker(): Speaker | null {
+    // 現在の最後のスピーカーIDから次のアルファベットを取得
+    const lastSpeaker = this.speakers[this.speakers.length - 1];
+    const nextCharCode = lastSpeaker.id.charCodeAt(0) + 1;
+    
+    // Zを超えた場合は追加しない
+    if (nextCharCode > 'Z'.charCodeAt(0)) {
+      return null;
+    }
+    
+    const nextId = String.fromCharCode(nextCharCode);
+    const newSpeaker: Speaker = { id: nextId, name: "" };
+    
+    this.speakers.push(newSpeaker);
+    return newSpeaker;
+  }
+
+  // 利用可能な次のスピーカーIDを取得（まだ追加せずに確認のみ）
+  getNextAvailableSpeakerId(): string | null {
+    const lastSpeaker = this.speakers[this.speakers.length - 1];
+    const nextCharCode = lastSpeaker.id.charCodeAt(0) + 1;
+    
+    if (nextCharCode > 'Z'.charCodeAt(0)) {
+      return null;
+    }
+    
+    return String.fromCharCode(nextCharCode);
   }
 
   // Comment関連のメソッド

@@ -79,6 +79,19 @@ export class ChatLogMakerView extends ItemView {
       (comment: Comment) => {
         this.dataManager.addComment(comment);
         this.updateDisplay();
+      },
+      () => {
+        // 新しいスピーカーを追加する処理
+        const newSpeaker = this.dataManager.addNextSpeaker();
+        if (newSpeaker) {
+          this.updatePostFormSpeakers();
+          // 新しく追加されたスピーカーを選択状態にする
+          this.postForm?.updateSpeakers(this.dataManager.getSpeakers());
+          // セレクターの値を新しいスピーカーに設定
+          setTimeout(() => {
+            this.postForm?.setSpeakerValue(newSpeaker.id);
+          }, 10);
+        }
       }
     );
 

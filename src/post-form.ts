@@ -6,18 +6,21 @@ export class PostForm {
   private container: HTMLElement;
   private speakers: Speaker[];
   private onSubmit: (comment: Comment) => void;
+  private onNewSpeaker?: () => void;
   private speakerSelector: SpeakerSelector;
   private messageInput: HTMLTextAreaElement | null = null;
 
   constructor(
     container: HTMLElement, 
     speakers: Speaker[], 
-    onSubmit: (comment: Comment) => void
+    onSubmit: (comment: Comment) => void,
+    onNewSpeaker?: () => void
   ) {
     this.container = container;
     this.speakers = speakers;
     this.onSubmit = onSubmit;
-    this.speakerSelector = new SpeakerSelector(speakers);
+    this.onNewSpeaker = onNewSpeaker;
+    this.speakerSelector = new SpeakerSelector(speakers, this.handleNewSpeaker.bind(this));
     this.createForm();
   }
 
@@ -86,6 +89,12 @@ export class PostForm {
     }
   }
 
+  private handleNewSpeaker(): void {
+    if (this.onNewSpeaker) {
+      this.onNewSpeaker();
+    }
+  }
+
   private clearForm(): void {
     if (this.messageInput) {
       this.messageInput.value = "";
@@ -96,5 +105,10 @@ export class PostForm {
   updateSpeakers(speakers: Speaker[]): void {
     this.speakers = speakers;
     this.speakerSelector.updateSpeakers(speakers);
+  }
+
+  // 選択されているスピーカーを設定
+  setSpeakerValue(speakerId: string): void {
+    this.speakerSelector.setValue(speakerId);
   }
 }

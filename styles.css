@@ -122,9 +122,9 @@
 .chat-log-maker-message-footer {
   display: flex;
   justify-content: flex-start;
-  margin-top: 8px;
-  padding-top: 6px;
-  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 2px;
+  padding-top: 1px;
+  /* border-top: 1px solid var(--background-modifier-border); */
 }
 
 /* 返信レベルの視覚化 */
@@ -155,7 +155,7 @@
   background: var(--background-secondary);
   border-radius: 6px;
   border: 1px solid var(--background-modifier-border);
-  padding: 12px;
+  padding: 8px;
   margin-top: 8px;
   display: flex;
   flex-direction: column;
@@ -272,13 +272,13 @@
   transition: opacity 0.2s ease;
 }
 
-/* --- 返信ボタン（YouTube風） --- */
+/* --- 返信ボタン--- */
 .chat-log-maker-message-footer .chat-log-maker-reply-btn {
   background: transparent;
   color: var(--text-muted);
   border: none;
   border-radius: 4px;
-  padding: 4px 12px;
+  /* padding: 4px 12px; */
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
