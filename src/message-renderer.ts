@@ -17,6 +17,7 @@ export class MessageRenderer {
     parentIndex: number;
     parentComment: Comment;
     messageValue: string;
+    selectedSpeakerId?: string; // 新しく追加されたスピーカーIDを保持
   } | null = null;
 
   constructor(
@@ -204,6 +205,10 @@ export class MessageRenderer {
           this.activeReplyForm.messageValue = textarea.value;
         }
         const newSpeaker = this.onNewSpeaker();
+        if (newSpeaker && this.activeReplyForm) {
+          // 新しく追加されたスピーカーIDを保存
+          this.activeReplyForm.selectedSpeakerId = newSpeaker.id;
+        }
         return newSpeaker;
       }
       return null;
@@ -224,6 +229,13 @@ export class MessageRenderer {
     // 保存されたメッセージ値があれば復元
     if (this.activeReplyForm && this.activeReplyForm.messageValue) {
       textarea.value = this.activeReplyForm.messageValue;
+    }
+
+    // 保存されたスピーカーIDがあれば自動選択
+    if (this.activeReplyForm && this.activeReplyForm.selectedSpeakerId) {
+      setTimeout(() => {
+        speakerSelector.setValue(this.activeReplyForm!.selectedSpeakerId!);
+      }, 50);
     }
 
     // ボタンエリア
