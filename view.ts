@@ -92,6 +92,7 @@ export class ChatLogMakerView extends ItemView {
             this.postForm?.setSpeakerValue(newSpeaker.id);
           }, 10);
         }
+        return newSpeaker;
       }
     );
 
@@ -113,6 +114,15 @@ export class ChatLogMakerView extends ItemView {
         onReplySubmit: (parentIndex: number, reply: Comment) => {
           this.dataManager.insertComment(parentIndex + 1, reply);
           this.updateDisplay();
+        },
+        onNewSpeaker: () => {
+          // リプライフォームでの新しいスピーカー追加処理
+          const newSpeaker = this.dataManager.addNextSpeaker();
+          if (newSpeaker) {
+            this.updateDisplay();
+            this.updatePostFormSpeakers();
+          }
+          return newSpeaker;
         },
       }
     );

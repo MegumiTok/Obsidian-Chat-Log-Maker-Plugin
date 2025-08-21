@@ -6,7 +6,7 @@ export class PostForm {
   private container: HTMLElement;
   private speakers: Speaker[];
   private onSubmit: (comment: Comment) => void;
-  private onNewSpeaker?: () => void;
+  private onNewSpeaker?: () => Speaker | null;
   private speakerSelector: SpeakerSelector;
   private messageInput: HTMLTextAreaElement | null = null;
 
@@ -14,7 +14,7 @@ export class PostForm {
     container: HTMLElement, 
     speakers: Speaker[], 
     onSubmit: (comment: Comment) => void,
-    onNewSpeaker?: () => void
+    onNewSpeaker?: () => Speaker | null
   ) {
     this.container = container;
     this.speakers = speakers;
@@ -89,10 +89,11 @@ export class PostForm {
     }
   }
 
-  private handleNewSpeaker(): void {
+  private handleNewSpeaker(): Speaker | null {
     if (this.onNewSpeaker) {
-      this.onNewSpeaker();
+      return this.onNewSpeaker();
     }
+    return null;
   }
 
   private clearForm(): void {

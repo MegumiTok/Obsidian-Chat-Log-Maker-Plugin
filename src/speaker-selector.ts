@@ -4,9 +4,9 @@ import { Speaker } from './types';
 export class SpeakerSelector {
   private speakers: Speaker[] = [];
   private selectElement: HTMLSelectElement | null = null;
-  private onNewSpeaker?: () => void;
+  private onNewSpeaker?: () => Speaker | null;
 
-  constructor(speakers: Speaker[], onNewSpeaker?: () => void) {
+  constructor(speakers: Speaker[], onNewSpeaker?: () => Speaker | null) {
     this.speakers = speakers;
     this.onNewSpeaker = onNewSpeaker;
   }
@@ -21,7 +21,13 @@ export class SpeakerSelector {
     this.selectElement.addEventListener("change", (e) => {
       const target = e.target as HTMLSelectElement;
       if (target.value === "NEW_SPEAKER" && this.onNewSpeaker) {
-        this.onNewSpeaker();
+        const newSpeaker = this.onNewSpeaker();
+        if (newSpeaker) {
+          // 新しいスピーカーが追加されたら、スピーカーリストを更新し、新しいスピーカーを選択
+          setTimeout(() => {
+            this.setValue(newSpeaker.id);
+          }, 10);
+        }
       }
     });
 

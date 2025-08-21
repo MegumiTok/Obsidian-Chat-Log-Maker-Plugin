@@ -10,6 +10,14 @@ export class MessageRenderer {
   private onCommentUpdate: (index: number, updates: Partial<Comment>) => void;
   private onCommentDelete: (index: number) => void;
   private onReplySubmit: (parentIndex: number, reply: Comment) => void;
+  private onNewSpeaker?: () => Speaker | null;
+  
+  // リプライフォームの状態を保持
+  private activeReplyForm: {
+    parentIndex: number;
+    parentComment: Comment;
+    messageValue: string;
+  } | null = null;
 
   constructor(
     container: HTMLElement,
@@ -20,6 +28,7 @@ export class MessageRenderer {
       onCommentUpdate: (index: number, updates: Partial<Comment>) => void;
       onCommentDelete: (index: number) => void;
       onReplySubmit: (parentIndex: number, reply: Comment) => void;
+      onNewSpeaker?: () => Speaker | null;
     }
   ) {
     this.container = container;
@@ -29,6 +38,7 @@ export class MessageRenderer {
     this.onCommentUpdate = callbacks.onCommentUpdate;
     this.onCommentDelete = callbacks.onCommentDelete;
     this.onReplySubmit = callbacks.onReplySubmit;
+    this.onNewSpeaker = callbacks.onNewSpeaker;
   }
 
   // メッセージ一覧を描画
@@ -42,6 +52,18 @@ export class MessageRenderer {
 
     this.comments.forEach((comment, index) => {
       this.renderMessage(comment, index);
+      
+      // アクティブなリプライフォームがある場合は再表示
+      if (this.activeReplyForm && 
+          this.activeReplyForm.parentIndex === index &&
+          this.activeReplyForm.parentComment.id === comment.id) {
+        setTimeout(() => {
+          const messageDiv = this.container.children[index] as HTMLElement;
+          if (messageDiv) {
+            this.recreateReplyForm(messageDiv, comment, index);
+          }
+        }, 10);
+      }
     });
   }
 
@@ -140,6 +162,7 @@ export class MessageRenderer {
     // 既存の返信フォームがあれば削除
     const existingReplyForm = messageDiv.querySelector(".chat-log-maker-reply-form");
     if (existingReplyForm) {
+      this.activeReplyForm = null;
       existingReplyForm.remove();
       return;
     }
@@ -148,6 +171,17 @@ export class MessageRenderer {
     const allReplyForms = document.querySelectorAll(".chat-log-maker-reply-form");
     allReplyForms.forEach(form => form.remove());
 
+    // アクティブなリプライフォーム状態を保存
+    this.activeReplyForm = {
+      parentIndex,
+      parentComment,
+      messageValue: ""
+    };
+
+    this.createReplyForm(messageDiv, parentComment, parentIndex);
+  }
+
+  private createReplyForm(messageDiv: HTMLElement, parentComment: Comment, parentIndex: number): void {
     // 返信フォームを作成
     const replyForm = messageDiv.createDiv("chat-log-maker-reply-form");
 
@@ -163,7 +197,17 @@ export class MessageRenderer {
       cls: "chat-log-maker-form-label",
     });
     
-    const speakerSelector = new SpeakerSelector(this.speakers);
+    const speakerSelector = new SpeakerSelector(this.speakers, () => {
+      if (this.onNewSpeaker) {
+        // 現在のメッセージ値を保存
+        if (this.activeReplyForm) {
+          this.activeReplyForm.messageValue = textarea.value;
+        }
+        const newSpeaker = this.onNewSpeaker();
+        return newSpeaker;
+      }
+      return null;
+    });
     speakerSelector.createSelect(speakerContainer);
 
     // メッセージ入力
@@ -176,6 +220,11 @@ export class MessageRenderer {
       cls: "chat-log-maker-message-input",
       attr: { placeholder: "Enter reply content..." },
     });
+
+    // 保存されたメッセージ値があれば復元
+    if (this.activeReplyForm && this.activeReplyForm.messageValue) {
+      textarea.value = this.activeReplyForm.messageValue;
+    }
 
     // ボタンエリア
     const buttonContainer = replyForm.createDiv("chat-log-maker-reply-buttons");
@@ -194,6 +243,14 @@ export class MessageRenderer {
     );
 
     textarea.focus();
+    // フォーカス時にカーソルを末尾に移動
+    setTimeout(() => {
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }, 10);
+  }
+
+  private recreateReplyForm(messageDiv: HTMLElement, parentComment: Comment, parentIndex: number): void {
+    this.createReplyForm(messageDiv, parentComment, parentIndex);
   }
 
   private setupReplyFormEventListeners(
@@ -205,6 +262,13 @@ export class MessageRenderer {
     parentComment: Comment,
     parentIndex: number
   ): void {
+    // メッセージ値の変更を監視
+    textarea.addEventListener("input", () => {
+      if (this.activeReplyForm) {
+        this.activeReplyForm.messageValue = textarea.value;
+      }
+    });
+
     // 返信投稿ボタンのイベント
     replySubmitBtn.addEventListener("click", () => {
       const selectedSpeaker = speakerSelector.getValue();
@@ -229,11 +293,14 @@ export class MessageRenderer {
         parentId: parentComment.id,
       };
 
+      // リプライフォーム状態をクリア
+      this.activeReplyForm = null;
       this.onReplySubmit(parentIndex, newReply);
     });
 
     // キャンセルボタンのイベント
     cancelBtn.addEventListener("click", () => {
+      this.activeReplyForm = null;
       replyForm.remove();
     });
 
@@ -261,7 +328,7 @@ export class MessageRenderer {
       cls: "chat-log-maker-form-label",
     });
     
-    const speakerSelector = new SpeakerSelector(this.speakers);
+    const speakerSelector = new SpeakerSelector(this.speakers, this.onNewSpeaker);
     const selectElement = speakerSelector.createSelect(speakerContainer);
     speakerSelector.setValue(comment.author);
 
