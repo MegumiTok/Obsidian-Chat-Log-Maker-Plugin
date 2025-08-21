@@ -165,8 +165,8 @@
 .chat-log-maker-post-form {
   background: var(--background-primary);
   border-radius: 8px;
-  padding: 16px;
-  gap: 12px;
+  padding: 12px;
+  gap: 8px;
   margin-top: 12px;
 }
 
@@ -179,32 +179,43 @@
 .chat-log-maker-edit-row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+
+.chat-log-maker-post-form .chat-log-maker-form-row:first-child {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .chat-log-maker-form-label {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-normal);
+  white-space: nowrap;
+  min-width: 60px;
 }
 
 .chat-log-maker-speaker-select {
-  padding: 4px 12px;
+  padding: 4px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   background: var(--background-secondary);
   color: var(--text-normal);
-  font-size: 14px;
+  font-size: 12px;
+  height: 28px;
+  min-width: 120px;
+  max-width: 200px;
 }
 
 .chat-log-maker-message-input {
-  padding: 8px 12px;
+  padding: 6px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   background: var(--background-secondary);
   color: var(--text-normal);
-  font-size: 14px;
-  min-height: 60px;
+  font-size: 13px;
+  min-height: 40px;
   resize: vertical;
   font-family: inherit;
 }
@@ -213,8 +224,9 @@
 .chat-log-maker-reply-buttons,
 .chat-log-maker-edit-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
+  margin-top: 4px;
 }
 
 .chat-log-maker-reply-to {
@@ -287,8 +299,8 @@
 
 /* --- ボタン個別サイズ調整 --- */
 .chat-log-maker-post-button {
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
 }
 
 /* --- ボタンホバー効果 --- */
